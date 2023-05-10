@@ -10,6 +10,7 @@ public class Faculty {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "faculty_id")
     private Long id;
 
     @Column(name = "faculty_code", nullable = false, unique = true)

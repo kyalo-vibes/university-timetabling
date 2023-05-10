@@ -3,6 +3,7 @@ package com.kyalo.universitytimetabling.domain;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "instructors")
@@ -25,7 +26,13 @@ public class Instructor {
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
-    private List<TimeSlot> preferences;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "instructor_preferences",
+            joinColumns = @JoinColumn(name = "instructor_id"),
+            inverseJoinColumns = @JoinColumn(name = "timeslot_id")
+    )
+    private Set<TimeSlot> preferences;
 
     public Instructor() {
     }
@@ -76,11 +83,11 @@ public class Instructor {
         this.department = department;
     }
 
-    public List<TimeSlot> getPreferences() {
+    public Set<TimeSlot> getPreferences() {
         return preferences;
     }
 
-    public void setPreferences(List<TimeSlot> preferences) {
+    public void setPreferences(Set<TimeSlot> preferences) {
         this.preferences = preferences;
     }
 }

@@ -1,11 +1,7 @@
 package com.kyalo.universitytimetabling.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.kyalo.universitytimetabling.domain.converter.LocalTimeAttributeConverter;
+import jakarta.persistence.*;
 
 import java.time.LocalTime;
 
@@ -21,9 +17,11 @@ public class TimeSlot {
     private String day;
 
     @Column(name = "start_time")
+    @Convert(converter = LocalTimeAttributeConverter.class)
     private LocalTime startTime;
 
     @Column(name = "end_time")
+    @Convert(converter = LocalTimeAttributeConverter.class)
     private LocalTime endTime;
 
     public TimeSlot() {

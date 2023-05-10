@@ -1,16 +1,10 @@
 package com.kyalo.universitytimetabling.service;
 
 import com.kyalo.universitytimetabling.domain.*;
-import com.kyalo.universitytimetabling.service.CourseService;
-import com.kyalo.universitytimetabling.service.InstructorService;
-import com.kyalo.universitytimetabling.service.RoomService;
-import com.kyalo.universitytimetabling.service.TimeSlotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class SchedulingService {
@@ -19,32 +13,61 @@ public class SchedulingService {
     private final InstructorService instructorService;
     private final RoomService roomService;
     private final TimeSlotService timeSlotService;
+    private final ProgramService programService;
+
 
     @Autowired
     public SchedulingService(CourseService courseService,
                              InstructorService instructorService,
                              RoomService roomService,
-                             TimeSlotService timeSlotService) {
+                             TimeSlotService timeSlotService, ProgramService programService) {
         this.courseService = courseService;
         this.instructorService = instructorService;
         this.roomService = roomService;
         this.timeSlotService = timeSlotService;
+        this.programService = programService;
     }
 
-    public List<Schedule> generateSchedule() {
-        List<Course> courses = courseService.getAllCourses();
+    public Map<String, Map<Integer, List<Schedule>>> generateScheduleForAllYearsAndPrograms(int semester) {
+        List<Course> allCourses = courseService.getAllCourses();
+        List<Program> allPrograms = programService.getAllPrograms();
         List<Instructor> instructors = instructorService.getAllInstructors();
         List<Room> rooms = roomService.getAllRooms();
         List<TimeSlot> timeSlots = timeSlotService.getAllTimeSlots();
 
-        List<Schedule> generatedSchedule = new ArrayList<>();
-        boolean result = scheduleCourses(0, courses, rooms, timeSlots, generatedSchedule);
+        Map<String, Map<Integer, List<Schedule>>> schedulesByProgramAndYear = new HashMap<>();
 
-        if (result) {
-            return generatedSchedule;
-        } else {
-            throw new RuntimeException("Failed to generate a schedule");
+        for (Program program : allPrograms) {
+            Map<Integer, List<Schedule>> schedulesByYear = new HashMap<>();
+            List<Course> programCourses = filterCoursesByProgram(allCourses, program);
+
+            for (int year = 1; year <= 4; year++) {
+                List<Course> filteredCourses = filterCoursesBySemesterAndYear(programCourses, semester, year);
+                List<Schedule> generatedSchedule = new ArrayList<>();
+                boolean result = scheduleCourses(0, filteredCourses, rooms, timeSlots, generatedSchedule);
+
+                if (result) {
+                    schedulesByYear.put(year, generatedSchedule);
+                } else {
+                    throw new RuntimeException("Failed to generate a schedule for " + program.getName() + " - Year " + year);
+                }
+            }
+            schedulesByProgramAndYear.put(program.getName(), schedulesByYear);
         }
+
+        return schedulesByProgramAndYear;
+    }
+
+    private List<Course> filterCoursesByProgram(List<Course> courses, Program program) {
+        List<Course> filteredCourses = new ArrayList<>();
+
+        for (Course course : courses) {
+            if (course.getProgram().equals(program)) {
+                filteredCourses.add(course);
+            }
+        }
+
+        return filteredCourses;
     }
 
     private boolean scheduleCourses(int courseIndex, List<Course> courses, List<Room> rooms,
@@ -86,6 +109,19 @@ public class SchedulingService {
         }
 
         return softConstraint.validate(schedule, generatedSchedule);
+    }
+
+
+    private List<Course> filterCoursesBySemesterAndYear(List<Course> courses, int semester, int year) {
+        List<Course> filteredCourses = new ArrayList<>();
+
+        for (Course course : courses) {
+            if (course.getSemester() == semester && course.getYear() == year) {
+                filteredCourses.add(course);
+            }
+        }
+
+        return filteredCourses;
     }
 
     public class HardConstraint {

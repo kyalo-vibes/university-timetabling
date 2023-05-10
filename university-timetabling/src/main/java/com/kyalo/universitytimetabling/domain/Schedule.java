@@ -1,12 +1,6 @@
 package com.kyalo.universitytimetabling.domain;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class Schedule {
@@ -27,8 +21,10 @@ public class Schedule {
     @JoinColumn(name = "time_slot_id")
     private TimeSlot timeSlot;
 
-    public Schedule() {
-    }
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "section_id")
+    private Section section;
+
 
     public Schedule(Course course, Room room, TimeSlot timeSlot) {
         this.course = course;
@@ -68,5 +64,13 @@ public class Schedule {
 
     public void setTimeSlot(TimeSlot timeSlot) {
         this.timeSlot = timeSlot;
+    }
+
+    public Section getSection() {
+        return section;
+    }
+
+    public void setSection(Section section) {
+        this.section = section;
     }
 }

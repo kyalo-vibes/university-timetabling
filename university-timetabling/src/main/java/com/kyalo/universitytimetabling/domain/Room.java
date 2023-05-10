@@ -14,12 +14,13 @@ public class Room {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "room_id")
     private Long id;
 
-    @Column(name = "room_number")
-    private String roomNumber;
+    @Column(name = "room_name")
+    private String roomName;
 
-    @Column(name = "capacity")
+    @Column(name = "room_capacity")
     private int capacity;
 
     @Column(name = "room_type")
@@ -32,8 +33,8 @@ public class Room {
     public Room() {
     }
 
-    public Room(String roomNumber, int capacity, String roomType, boolean isAvailable) {
-        this.roomNumber = roomNumber;
+    public Room(String roomName, int capacity, String roomType, boolean isAvailable) {
+        this.roomName = roomName;
         this.capacity = capacity;
         this.roomType = roomType;
         this.isAvailable = isAvailable;
@@ -47,12 +48,12 @@ public class Room {
         this.id = id;
     }
 
-    public String getRoomNumber() {
-        return roomNumber;
+    public String getRoomName() {
+        return roomName;
     }
 
-    public void setRoomNumber(String roomNumber) {
-        this.roomNumber = roomNumber;
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
     }
 
     public int getCapacity() {
