@@ -1,12 +1,8 @@
 package com.kyalo.universitytimetabling.domain;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "rooms")
@@ -29,6 +25,10 @@ public class Room {
     @Column(name = "is_available")
     private boolean isAvailable;
 
+    @ManyToOne
+    @JoinColumn(name = "dept_id", nullable = false)
+    @JsonBackReference
+    private Department department;
 
     public Room() {
     }

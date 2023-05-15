@@ -1,5 +1,6 @@
 package com.kyalo.universitytimetabling.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,20 +12,26 @@ public class Schedule {
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "course_id")
+    @JsonBackReference
     private Course course;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "room_id")
+    @JsonBackReference
     private Room room;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "time_slot_id")
+    @JsonBackReference
     private TimeSlot timeSlot;
 
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "section_id")
     private Section section;
 
+    // Default constructor
+    public Schedule() {
+    }
 
     public Schedule(Course course, Room room, TimeSlot timeSlot) {
         this.course = course;

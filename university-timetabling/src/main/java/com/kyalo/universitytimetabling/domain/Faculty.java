@@ -1,5 +1,6 @@
 package com.kyalo.universitytimetabling.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +21,7 @@ public class Faculty {
     private String facultyName;
 
     @OneToMany(mappedBy = "faculty", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private Set<Department> departments = new HashSet<>();
 
     public Faculty() {

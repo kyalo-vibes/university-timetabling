@@ -1,5 +1,7 @@
 package com.kyalo.universitytimetabling.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.Set;
@@ -10,6 +12,7 @@ public class Course {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "course_id")
     private Long id;
 
     @Column(name = "course_code", nullable = false, unique = true)
@@ -18,8 +21,6 @@ public class Course {
     @Column(name = "course_name", nullable = false)
     private String courseName;
 
-    @Column(name = "num_students", nullable = false)
-    private int numStudents;
 
     @Column(name = "year")
     private int year;
@@ -28,19 +29,24 @@ public class Course {
     private int semester;
 
     @ManyToOne
-    @JoinColumn(name = "program_id")
+    @JoinColumn(name = "programme_id")
+    @JsonBackReference
     private Program program;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private Set<Section> sections;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id", nullable = false)
+    @JoinColumn(name = "dept_id", nullable = false)
+    @JsonBackReference
     private Department department;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instructor_id", nullable = false)
+    @JsonBackReference
     private Instructor instructor;
+
 
     public Course() {
     }
@@ -71,13 +77,6 @@ public class Course {
         this.courseName = courseName;
     }
 
-    public int getNumStudents() {
-        return numStudents;
-    }
-
-    public void setNumStudents(int numStudents) {
-        this.numStudents = numStudents;
-    }
 
     public Set<Section> getSections() {
         return sections;

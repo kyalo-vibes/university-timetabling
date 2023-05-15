@@ -1,5 +1,7 @@
 package com.kyalo.universitytimetabling.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -11,6 +13,7 @@ public class Instructor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "instructor_id")
     private Long id;
 
     @Column(name = "first_name")
@@ -19,14 +22,14 @@ public class Instructor {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "email")
-    private String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "dept_id", nullable = false)
+    @JsonManagedReference
     private Department department;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinTable(
             name = "instructor_preferences",
             joinColumns = @JoinColumn(name = "instructor_id"),
@@ -37,10 +40,9 @@ public class Instructor {
     public Instructor() {
     }
 
-    public Instructor(String firstName, String lastName, String email) {
+    public Instructor(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email = email;
     }
 
     public Long getId() {
@@ -65,14 +67,6 @@ public class Instructor {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public Department getDepartment() {
