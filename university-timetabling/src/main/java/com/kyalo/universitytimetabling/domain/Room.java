@@ -4,6 +4,9 @@ package com.kyalo.universitytimetabling.domain;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "rooms")
 public class Room {
@@ -29,6 +32,9 @@ public class Room {
     @JoinColumn(name = "dept_id", nullable = false)
     @JsonBackReference
     private Department department;
+
+    @ManyToMany
+    private List<TimeSlot> occupiedTimeSlots = new ArrayList<>();
 
     public Room() {
     }
@@ -78,5 +84,25 @@ public class Room {
 
     public void setAvailable(boolean available) {
         isAvailable = available;
+    }
+
+    public boolean isAvailable(TimeSlot timeSlot) {
+        return !occupiedTimeSlots.contains(timeSlot);
+    }
+
+    public void occupyTimeSlot(TimeSlot timeSlot) {
+        occupiedTimeSlots.add(timeSlot);
+    }
+
+    public void freeTimeSlot(TimeSlot timeSlot) {
+        occupiedTimeSlots.remove(timeSlot);
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    public Department getDepartment() {
+        return department;
     }
 }

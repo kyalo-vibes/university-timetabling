@@ -25,7 +25,7 @@ public class Schedule {
     @JsonBackReference
     private TimeSlot timeSlot;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "section_id")
     private Section section;
 

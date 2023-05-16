@@ -5,6 +5,7 @@ import com.kyalo.universitytimetabling.repository.CourseRepository;
 import com.kyalo.universitytimetabling.repository.RoomRepository;
 import com.kyalo.universitytimetabling.repository.ScheduleRepository;
 import com.kyalo.universitytimetabling.repository.TimeSlotRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,6 +20,7 @@ public class ScheduleService {
     private final TimeSlotRepository timeSlotRepository;
     private final ScheduleRepository scheduleRepository;
 
+
     public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository) {
         this.courseRepository = courseRepository;
         this.roomRepository = roomRepository;
@@ -27,54 +29,96 @@ public class ScheduleService {
     }
 
     // Main scheduling method
-    public void generateSchedule() {
-        // Retrieve all courses, rooms and timeslots
-        List<Course> courses = courseRepository.findAll();
+    // Main scheduling method
+    @Transactional
+    public ScheduleResult generateSchedule(int semester) {
+        List<Course> courses = courseRepository.findBySemester(semester);
         List<Room> rooms = roomRepository.findAll();
         List<TimeSlot> timeSlots = timeSlotRepository.findAll();
+        List<Schedule> schedules = new ArrayList<>();
 
-        // Sort the courses based on the heuristic function
-        courses.sort(Comparator.comparing(c -> getValidTimeSlotsForCourse(c, scheduleRepository.findAll()).size() * getValidRoomsForCourse(c, scheduleRepository.findAll()).size()));
+        // Check if there are any courses to schedule
+        if(courses.isEmpty()) {
+            return new ScheduleResult(schedules, "No courses to schedule.");
+        }
 
-        // Assign courses to rooms and timeslots
-        for (Course course : courses) {
-            // Get valid rooms and timeslots for the course
-            List<Room> validRooms = getValidRoomsForCourse(course, scheduleRepository.findAll());
-            List<TimeSlot> validTimeSlots = getValidTimeSlotsForCourse(course, scheduleRepository.findAll());
+        // Create a copy of the courses list for backtracking purposes
+        List<Course> coursesCopy = new ArrayList<>(courses);
 
-            boolean scheduled = false;
+        while (!coursesCopy.isEmpty()) {
+            // Choose the most constrained course first
+            Course mostConstrainedCourse = getMostConstrainedCourse(coursesCopy, schedules);
 
-            // Assign course to a room and timeslot
-            for (Room room : validRooms) {
-                for (TimeSlot timeSlot : validTimeSlots) {
+            if (mostConstrainedCourse == null) {
+                // If no course can be scheduled, return the schedules generated so far
+                return new ScheduleResult(schedules, "No valid schedule can be found for remaining courses");
+            }
+
+            if (assignCourseToSchedule(mostConstrainedCourse, rooms, timeSlots, schedules)) {
+                // Only remove the scheduled course from the list if it was successfully scheduled
+                coursesCopy.remove(mostConstrainedCourse);
+            } else {
+                if (!backtrackScheduleHelper(coursesCopy, rooms, timeSlots, coursesCopy.indexOf(mostConstrainedCourse), schedules)) {
+                    return new ScheduleResult(schedules, "No valid schedule can be found for course " + mostConstrainedCourse.getCourseName() + " onwards");
+                }
+            }
+        }
+
+        // Check if any courses have been scheduled
+        boolean anyCoursesScheduled = !schedules.isEmpty();
+
+        if(!anyCoursesScheduled) {
+            return new ScheduleResult(schedules, "No courses were scheduled.");
+        } else {
+            return new ScheduleResult(schedules, "Schedule created successfully");
+        }
+    }
+
+
+    @Transactional
+    private boolean assignCourseToSchedule(Course course, List<Room> rooms, List<TimeSlot> timeSlots, List<Schedule> schedules) {
+        // Assign course to a room and timeslot
+        for (Room room : rooms) {
+            for (TimeSlot timeSlot : timeSlots) {
+                // Check if the room and time slot are valid for the course
+                if (room.isAvailable(timeSlot) && !instructorBusyAt(course.getInstructor(), timeSlot, schedules) &&
+                        !studentBusyAt(course, timeSlot, schedules) && roomBelongsToDept(course, room)) {
+
                     Schedule schedule = new Schedule();
                     schedule.setCourse(course);
                     schedule.setRoom(room);
                     schedule.setTimeSlot(timeSlot);
 
+                    // Make room unavailable
+                    room.occupyTimeSlot(timeSlot);
+
                     // Add the schedule to the schedule repository
                     scheduleRepository.save(schedule);
 
+                    // Add the created schedule to the schedules list
+                    schedules.add(schedule);
+
                     // Check for any constraint violations
-                    if (evaluateSchedule(scheduleRepository.findAll()) >= 0) {
-                        scheduled = true;
-                        break;
+                    if (evaluateSchedule(schedules) >= 0) {
+                        return true;
                     } else {
-                        // If the schedule is not valid, remove it from the schedule repository
+                        // If the schedule is not valid, remove it from the schedule repository and the schedules list
                         scheduleRepository.delete(schedule);
+                        schedules.remove(schedule);
+
+                        // Make room available again
+                        room.freeTimeSlot(timeSlot);
                     }
                 }
-                if (scheduled) {
-                    break;
-                }
-            }
-
-            // If the course could not be scheduled, backtrack
-            if (!scheduled) {
-                backtrackingSchedule(courses, rooms, timeSlots);
             }
         }
+
+        // If we made it here, it means we couldn't assign the course to a schedule.
+        // We should return true here to break the loop in generateSchedule().
+        return true;
     }
+
+
 
 
     // Define heuristic function here
@@ -167,20 +211,23 @@ public class ScheduleService {
     }
 
     // Define backtracking function here
-    public Schedule backtrackingSchedule(List<Course> courses, List<Room> rooms, List<TimeSlot> timeSlots) {
-        // Create a new schedule
-        Schedule schedule = new Schedule();
+    @Transactional
+    public List<Schedule> backtrackingSchedule(List<Course> courses, List<Room> rooms, List<TimeSlot> timeSlots) {
+        // Create a new list of schedules
+        List<Schedule> schedules = new ArrayList<>();
 
-        // Call the recursive helper function to fill in the schedule
-        if (backtrackScheduleHelper(courses, rooms, timeSlots, 0, schedule)) {
-            return schedule;
+        // Call the recursive helper function to fill in the schedules
+        if (backtrackScheduleHelper(courses, rooms, timeSlots, 0, schedules)) {
+            return schedules;
         }
 
         // If no valid schedule was found, return null
         return null;
     }
 
-    private boolean backtrackScheduleHelper(List<Course> courses, List<Room> rooms, List<TimeSlot> timeSlots, int courseIndex, Schedule schedule) {
+
+    @Transactional
+    private boolean backtrackScheduleHelper(List<Course> courses, List<Room> rooms, List<TimeSlot> timeSlots, int courseIndex, List<Schedule> schedules) {
         // If we've assigned all courses, the schedule is complete
         if (courseIndex == courses.size()) {
             return true;
@@ -191,9 +238,12 @@ public class ScheduleService {
         // Iterate over all rooms and time slots
         for (Room room : rooms) {
             for (TimeSlot timeSlot : timeSlots) {
+                // Create a new Schedule for this assignment
+                Schedule schedule = new Schedule();
+
                 // Check if the room and time slot are valid for the course
-                if (room.isAvailable() && !instructorBusyAt(course.getInstructor(), timeSlot, schedule) &&
-                        !studentBusyAt(course, timeSlot, schedule) && roomBelongsToDept(course, room)) {
+                if (room.isAvailable(timeSlot) && !instructorBusyAt(course.getInstructor(), timeSlot, schedules) &&
+                        !studentBusyAt(course, timeSlot, schedules) && roomBelongsToDept(course, room)) {
 
                     // Assign the course to the room and time slot
                     schedule.setCourse(course);
@@ -201,36 +251,52 @@ public class ScheduleService {
                     schedule.setTimeSlot(timeSlot);
 
                     // Make room unavailable
-                    room.setAvailable(false);
+                    room.occupyTimeSlot(timeSlot);
+
+                    // Add the schedule to the schedule repository and the current schedules list
+                    scheduleRepository.save(schedule);
+                    schedules.add(schedule);
 
                     // Recursively assign the rest of the courses
-                    if (backtrackScheduleHelper(courses, rooms, timeSlots, courseIndex + 1, schedule)) {
+                    if (backtrackScheduleHelper(courses, rooms, timeSlots, courseIndex + 1, schedules)) {
                         return true;
                     }
 
                     // If assigning the course to the room and time slot didn't lead to a solution, remove it
-                    schedule.setCourse(null);
-                    schedule.setRoom(null);
-                    schedule.setTimeSlot(null);
+                    scheduleRepository.delete(schedule);
+                    schedules.remove(schedule);
 
                     // Make room available again
-                    room.setAvailable(true);
+                    room.freeTimeSlot(timeSlot);
                 }
             }
         }
 
-        // If no room and time slot could be found for the course, return false
+        // If no room and time slot could be found for the course, backtrack by returning false
+        // This will trigger the backtracking process in the previous recursion level
         return false;
     }
 
-    private boolean instructorBusyAt(Instructor instructor, TimeSlot timeSlot, Schedule schedule) {
+
+
+    private boolean instructorBusyAt(Instructor instructor, TimeSlot timeSlot, List<Schedule> schedules) {
         // Check if the instructor is already teaching a course at the given time slot
-        return schedule.getCourse().getInstructor().equals(instructor) && schedule.getTimeSlot().equals(timeSlot);
+        for(Schedule schedule : schedules) {
+            if(schedule.getCourse().getInstructor().equals(instructor) && schedule.getTimeSlot().equals(timeSlot)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private boolean studentBusyAt(Course course, TimeSlot timeSlot, Schedule schedule) {
+    private boolean studentBusyAt(Course course, TimeSlot timeSlot, List<Schedule> schedules) {
         // Check if the students are already taking a course at the given time slot
-        return schedule.getCourse().getProgram().equals(course.getProgram()) && schedule.getTimeSlot().equals(timeSlot);
+        for(Schedule schedule : schedules) {
+            if(schedule.getCourse().getProgram().equals(course.getProgram()) && schedule.getTimeSlot().equals(timeSlot)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean roomBelongsToDept(Course course, Room room) {
@@ -238,7 +304,5 @@ public class ScheduleService {
         // This implementation assumes that a method getRooms() exists in the Department class
         return course.getDepartment().getRooms().contains(room);
     }
-
-
 
 }
