@@ -86,7 +86,10 @@ public class ScheduleService {
                 courseCodes.add(schedule.getCourse().getCourseCode());
                 instructorNames.add(schedule.getCourse().getInstructor().getFirstName());
                 roomNames.add(schedule.getRoom().getRoomName());
-                timeSlots.add(schedule.getTimeSlot().getTime());
+
+                // Add the day of the week to the time slot
+                String timeSlotWithDay = schedule.getTimeSlot().getDay() + " " + schedule.getTimeSlot().getTime();
+                timeSlots.add(timeSlotWithDay);
             }
         }
 
@@ -104,6 +107,7 @@ public class ScheduleService {
 
         return scheduleResults;
     }
+
 
 
     public Map<String, ScheduleResult> getSchedulesForInstructorId(Long instructorId) {
@@ -124,7 +128,10 @@ public class ScheduleService {
                 // Add the values to the respective lists
                 courseCodes.add(schedule.getCourse().getCourseCode());
                 roomNames.add(schedule.getRoom().getRoomName());
-                timeSlots.add(schedule.getTimeSlot().getTime());
+
+                // Add the day of the week to the time slot
+                String timeSlotWithDay = schedule.getTimeSlot().getDay() + " " + schedule.getTimeSlot().getTime();
+                timeSlots.add(timeSlotWithDay);
             }
         }
 
@@ -142,6 +149,7 @@ public class ScheduleService {
 
         return scheduleResults;
     }
+
 
 
     @Transactional
@@ -200,74 +208,87 @@ public class ScheduleService {
     private boolean assignCourseToSchedule(Course course, List<Room> rooms, List<TimeSlot> timeSlots, List<Schedule> schedules) {
         // Assign course to a room and timeslot
         for (Room room : rooms) {
+            // First, iterate through the instructor's preferred time slots
+            Set<TimeSlot> preferredTimeSlots = course.getInstructor().getPreferences();
+            for (TimeSlot timeSlot : preferredTimeSlots) {
+                if (tryAssignCourseToTimeSlot(course, room, timeSlot, schedules)) {
+                    return true;
+                }
+            }
+
+            // Then, iterate through all other time slots
             for (TimeSlot timeSlot : timeSlots) {
-                Section section = course.getSection();
-
-                // Check if the section is not null before proceeding
-                if (section == null) {
-                    // handle this situation appropriately, e.g., log an error message, throw an exception, or skip this course
-                    return false;
-                }
-
-                // Check if the section is fully scheduled, continue to the next iteration
-                if (isSectionFullyScheduled(section, schedules)) {
-                    continue;
-                }
-
-                // Check if the room and time slot are valid for the course
-                // Also check if the room's name contains the course's year
-                if (room.isAvailable(timeSlot) && !instructorBusyAt(course.getInstructor(), timeSlot, schedules) &&
-                        !studentBusyAt(course, timeSlot, schedules) && roomBelongsToDept(course, room) &&
-                        room.getRoomName().contains(Integer.toString(course.getYear()))) {
-
-                    Schedule schedule = new Schedule();
-                    schedule.setCourse(course);
-                    schedule.setRoom(room);
-                    schedule.setTimeSlot(timeSlot);
-                    schedule.setSection(section);
-
-                    // Make room unavailable
-                    room.occupyTimeSlot(timeSlot);
-
-                    // Add the schedule to the schedule repository
-                    scheduleRepository.save(schedule);
-
-                    // Add the created schedule to the schedules list
-                    schedules.add(schedule);
-
-                    // Check for any constraint violations
-                    if (evaluateSchedule(schedules) >= 0) {
-                        // If the course has been scheduled for the number of classes required, return true
-                        if (getScheduledClassesForSection(section, schedules) >= section.getNumberOfClasses()) {
-                            return true;
-                        } else {
-                            // Continue scheduling the course until it has been scheduled for the required number of classes
-                            continue;
-                        }
-                    } else {
-                        // If the schedule is not valid, remove it from the schedule repository and the schedules list
-                        scheduleRepository.delete(schedule);
-                        schedules.remove(schedule);
-
-                        // Make room available again
-                        room.freeTimeSlot(timeSlot);
+                // Skip the preferred time slots since they have already been checked
+                if (!preferredTimeSlots.contains(timeSlot)) {
+                    if (tryAssignCourseToTimeSlot(course, room, timeSlot, schedules)) {
+                        return true;
                     }
                 }
             }
-        }
-
-        // Check if there are no valid rooms or time slots for the course
-        if (getValidRoomsForCourse(course, schedules).isEmpty()) {
-            throw new RuntimeException("No valid rooms for the course " + course.getCourseName());
-        }
-        if (getValidTimeSlotsForCourse(course, schedules).isEmpty()) {
-            throw new RuntimeException("No valid time slots for the course " + course.getCourseName());
         }
 
         // If we made it here, it means we couldn't assign the course to a schedule.
         // We should return false here to signal that we couldn't find a valid schedule for this course.
         return false;
     }
+
+    private boolean tryAssignCourseToTimeSlot(Course course, Room room, TimeSlot timeSlot, List<Schedule> schedules) {
+        Section section = course.getSection();
+
+        // Check if the section is not null before proceeding
+        if (section == null) {
+            // handle this situation appropriately, e.g., log an error message, throw an exception, or skip this course
+            return false;
+        }
+
+        // Check if the section is fully scheduled, continue to the next iteration
+        if (isSectionFullyScheduled(section, schedules)) {
+            return false;
+        }
+
+        // Check if the room and time slot are valid for the course
+        // Also check if the room's name contains the course's year
+        if (room.isAvailable(timeSlot) && !instructorBusyAt(course.getInstructor(), timeSlot, schedules) &&
+                !studentBusyAt(course, timeSlot, schedules) && roomBelongsToDept(course, room) &&
+                room.getRoomName().contains(Integer.toString(course.getYear()))) {
+
+            Schedule schedule = new Schedule();
+            schedule.setCourse(course);
+            schedule.setRoom(room);
+            schedule.setTimeSlot(timeSlot);
+            schedule.setSection(section);
+
+            // Make room unavailable
+            room.occupyTimeSlot(timeSlot);
+
+            // Add the schedule to the schedule repository
+            scheduleRepository.save(schedule);
+
+            // Add the created schedule to the schedules list
+            schedules.add(schedule);
+
+            // Check for any constraint violations
+            if (evaluateSchedule(schedules) >= 0) {
+                // If the course has been scheduled for the number of classes required, return true
+                if (getScheduledClassesForSection(section, schedules) >= section.getNumberOfClasses()) {
+                    return true;
+                } else {
+                    // Continue scheduling the course until it has been scheduled for the required number of classes
+                    return false;
+                }
+            } else {
+                // If the schedule is not valid, remove it from the schedule repository and the schedules list
+                scheduleRepository.delete(schedule);
+                schedules.remove(schedule);
+
+                // Make room available again
+                room.freeTimeSlot(timeSlot);
+            }
+        }
+
+        return false;
+    }
+
 
     // Add this new helper method to get the number of scheduled classes for a section
     private int getScheduledClassesForSection(Section section, List<Schedule> schedules) {
