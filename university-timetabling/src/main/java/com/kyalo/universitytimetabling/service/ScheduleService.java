@@ -1,10 +1,7 @@
 package com.kyalo.universitytimetabling.service;
 
 import com.kyalo.universitytimetabling.domain.*;
-import com.kyalo.universitytimetabling.repository.CourseRepository;
-import com.kyalo.universitytimetabling.repository.RoomRepository;
-import com.kyalo.universitytimetabling.repository.ScheduleRepository;
-import com.kyalo.universitytimetabling.repository.TimeSlotRepository;
+import com.kyalo.universitytimetabling.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -19,20 +16,58 @@ public class ScheduleService {
     private final RoomRepository roomRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ScheduleRepository scheduleRepository;
+    private final ProgramRepository programRepository;
 
 
-    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository) {
+    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository, ProgramRepository programRepository) {
         this.courseRepository = courseRepository;
         this.roomRepository = roomRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.scheduleRepository = scheduleRepository;
+        this.programRepository = programRepository;
     }
 
     // Main scheduling method
-    // Main scheduling method
     @Transactional
-    public ScheduleResult generateSchedule(int semester) {
-        List<Course> courses = courseRepository.findBySemester(semester);
+    public Map<String, List<ScheduleResult>> generateSchedule(int semester) {
+        Map<String, List<ScheduleResult>> scheduleResults = new HashMap<>();
+
+        List<Program> programs = programRepository.findAll();
+
+        for (Program program : programs) {
+            for (int year = 1; year <= 4; year++) { // Adjust this according to the number of years in your program
+                ScheduleResult result = generateYearlySchedule(semester, year, program);
+                String key = "Year " + year + " " + program.getName();
+                if(!scheduleResults.containsKey(key)){
+                    scheduleResults.put(key, new ArrayList<>());
+                }
+                scheduleResults.get(key).add(result);
+            }
+        }
+
+        return scheduleResults;
+    }
+
+    // Add a new method to get schedules for a specific program and year
+    public List<ScheduleResult> getSchedulesForProgramAndYear(String programName, int year) {
+        List<ScheduleResult> results = new ArrayList<>();
+
+        // Get all the schedules from the database
+        List<Schedule> schedules = scheduleRepository.findAll();
+
+        // Filter the schedules based on the program and year
+        for (Schedule schedule : schedules) {
+            Course course = schedule.getCourse();
+            if (course.getProgram().getName().equals(programName) && course.getYear() == year) {
+                results.add(new ScheduleResult(Arrays.asList(schedule), "Schedules for Year " + year + " " + programName));
+            }
+        }
+
+        return results;
+    }
+    @Transactional
+    public ScheduleResult generateYearlySchedule(int semester, int year, Program program) {
+        List<Course> courses = courseRepository.findBySemesterAndYearAndProgram(semester, year, program);
         List<Room> rooms = roomRepository.findAll();
         List<TimeSlot> timeSlots = timeSlotRepository.findAll();
         List<Schedule> schedules = new ArrayList<>();
@@ -44,6 +79,9 @@ public class ScheduleService {
 
         // Create a copy of the courses list for backtracking purposes
         List<Course> coursesCopy = new ArrayList<>(courses);
+
+        // Create a set to keep track of the years for which courses have been scheduled
+        Set<Integer> scheduledYears = new HashSet<>();
 
         while (!coursesCopy.isEmpty()) {
             // Choose the most constrained course first
@@ -57,6 +95,9 @@ public class ScheduleService {
             if (assignCourseToSchedule(mostConstrainedCourse, rooms, timeSlots, schedules)) {
                 // Only remove the scheduled course from the list if it was successfully scheduled
                 coursesCopy.remove(mostConstrainedCourse);
+
+                // Add the year of the course to the set of scheduled years
+                scheduledYears.add(mostConstrainedCourse.getYear());
             } else {
                 if (!backtrackScheduleHelper(coursesCopy, rooms, timeSlots, coursesCopy.indexOf(mostConstrainedCourse), schedules)) {
                     return new ScheduleResult(schedules, "No valid schedule can be found for course " + mostConstrainedCourse.getCourseName() + " onwards");
@@ -75,19 +116,38 @@ public class ScheduleService {
     }
 
 
+
     @Transactional
     private boolean assignCourseToSchedule(Course course, List<Room> rooms, List<TimeSlot> timeSlots, List<Schedule> schedules) {
         // Assign course to a room and timeslot
         for (Room room : rooms) {
             for (TimeSlot timeSlot : timeSlots) {
                 // Check if the room and time slot are valid for the course
+                // Also check if the room's name contains the course's year
                 if (room.isAvailable(timeSlot) && !instructorBusyAt(course.getInstructor(), timeSlot, schedules) &&
-                        !studentBusyAt(course, timeSlot, schedules) && roomBelongsToDept(course, room)) {
+                        !studentBusyAt(course, timeSlot, schedules) && roomBelongsToDept(course, room) &&
+                        room.getRoomName().contains(Integer.toString(course.getYear()))) {
 
                     Schedule schedule = new Schedule();
                     schedule.setCourse(course);
                     schedule.setRoom(room);
                     schedule.setTimeSlot(timeSlot);
+
+                    // Set the section for the schedule
+                    Section section = course.getSection();
+
+                    // Check if the section is not null before proceeding
+                    if (section == null) {
+                        // handle this situation appropriately, e.g., log an error message, throw an exception, or skip this course
+                        return false;
+                    }
+
+                    // If the section is fully scheduled, continue to the next iteration
+                    if (isSectionFullyScheduled(section, schedules)) {
+                        continue;
+                    }
+
+                    schedule.setSection(section);
 
                     // Make room unavailable
                     room.occupyTimeSlot(timeSlot);
@@ -113,10 +173,20 @@ public class ScheduleService {
             }
         }
 
+        // Check if there are no valid rooms or time slots for the course
+        if (getValidRoomsForCourse(course, schedules).isEmpty()) {
+            throw new RuntimeException("No valid rooms for the course " + course.getCourseName());
+        }
+        if (getValidTimeSlotsForCourse(course, schedules).isEmpty()) {
+            throw new RuntimeException("No valid time slots for the course " + course.getCourseName());
+        }
+
         // If we made it here, it means we couldn't assign the course to a schedule.
-        // We should return true here to break the loop in generateSchedule().
-        return true;
+        // We should return false here to signal that we couldn't find a valid schedule for this course.
+        return false;
     }
+
+
 
 
 
@@ -304,5 +374,20 @@ public class ScheduleService {
         // This implementation assumes that a method getRooms() exists in the Department class
         return course.getDepartment().getRooms().contains(room);
     }
+
+    private boolean isSectionFullyScheduled(Section section, List<Schedule> schedules) {
+        int classesScheduled = 0;
+
+        // Loop over the schedules and count how many times this section appears
+        for (Schedule schedule : schedules) {
+            if (schedule.getCourse().getSection().equals(section)) {
+                classesScheduled++;
+            }
+        }
+
+        // Compare the number of scheduled classes with the section's numberOfClasses
+        return classesScheduled >= section.getNumberOfClasses();
+    }
+
 
 }

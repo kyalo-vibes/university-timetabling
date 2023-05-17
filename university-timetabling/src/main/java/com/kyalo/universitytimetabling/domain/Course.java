@@ -34,9 +34,9 @@ public class Course {
     @JsonBackReference
     private Program program;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Section> sections;
+    private Section section;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dept_id", nullable = false)
@@ -79,12 +79,12 @@ public class Course {
     }
 
 
-    public List<Section> getSections() {
-        return sections;
+    public Section getSection() {
+        return section;
     }
 
-    public void setSections(List<Section> sections) {
-        this.sections = sections;
+    public void setSection(Section section) {
+        this.section = section;
     }
 
     public Department getDepartment() {
