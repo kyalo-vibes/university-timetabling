@@ -78,8 +78,6 @@ com.kyalo.universitytimetabling
     ├── SectionController.java
     └── TimeSlotController.java
 
-
-
 ## Getting Started
 
 ### Prerequisites
