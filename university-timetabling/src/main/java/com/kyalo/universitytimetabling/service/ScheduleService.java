@@ -65,6 +65,50 @@ public class ScheduleService {
 
         return results;
     }
+
+    public Map<String, ScheduleResult> getSchedulesForProgramIdYearAndSemester(Long programId, int year, int semester) {
+        Map<String, ScheduleResult> scheduleResults = new HashMap<>();
+
+        // Get all the schedules from the database
+        List<Schedule> schedules = scheduleRepository.findAll();
+
+        // Initialize lists to store the multiple values for each ScheduleResult field
+        List<String> courseCodes = new ArrayList<>();
+        List<String> instructorNames = new ArrayList<>();
+        List<String> roomNames = new ArrayList<>();
+        List<String> timeSlots = new ArrayList<>();
+
+        // Filter the schedules based on the programId, year, and semester
+        for (Schedule schedule : schedules) {
+            Course course = schedule.getCourse();
+            if (course.getProgram().getId().equals(programId) && (course.getYear() == year) && (course.getSemester() == semester)) {
+                // Add the values to the respective lists
+                courseCodes.add(schedule.getCourse().getCourseCode());
+                instructorNames.add(schedule.getCourse().getInstructor().getFirstName());
+                roomNames.add(schedule.getRoom().getRoomName());
+                timeSlots.add(schedule.getTimeSlot().getTime());
+            }
+        }
+
+        // If there are any matching schedules, create a ScheduleResult and add it to the map
+        if (!courseCodes.isEmpty()) {
+            String key = "Year " + year + " " + schedules.get(0).getCourse().getProgram().getName(); // Use program name instead of ID
+            ScheduleResult result = new ScheduleResult();
+            result.setCourseCodes(courseCodes);
+            result.setInstructorNames(instructorNames);
+            result.setRoomNames(roomNames);
+            result.setTimeSlots(timeSlots);
+            result.setMessage(key);
+            scheduleResults.put(key, result);
+        }
+
+        return scheduleResults;
+    }
+
+
+
+
+
     @Transactional
     public ScheduleResult generateYearlySchedule(int semester, int year, Program program) {
         List<Course> courses = courseRepository.findBySemesterAndYearAndProgram(semester, year, program);
@@ -122,6 +166,19 @@ public class ScheduleService {
         // Assign course to a room and timeslot
         for (Room room : rooms) {
             for (TimeSlot timeSlot : timeSlots) {
+                Section section = course.getSection();
+
+                // Check if the section is not null before proceeding
+                if (section == null) {
+                    // handle this situation appropriately, e.g., log an error message, throw an exception, or skip this course
+                    return false;
+                }
+
+                // Check if the section is fully scheduled, continue to the next iteration
+                if (isSectionFullyScheduled(section, schedules)) {
+                    continue;
+                }
+
                 // Check if the room and time slot are valid for the course
                 // Also check if the room's name contains the course's year
                 if (room.isAvailable(timeSlot) && !instructorBusyAt(course.getInstructor(), timeSlot, schedules) &&
@@ -132,21 +189,6 @@ public class ScheduleService {
                     schedule.setCourse(course);
                     schedule.setRoom(room);
                     schedule.setTimeSlot(timeSlot);
-
-                    // Set the section for the schedule
-                    Section section = course.getSection();
-
-                    // Check if the section is not null before proceeding
-                    if (section == null) {
-                        // handle this situation appropriately, e.g., log an error message, throw an exception, or skip this course
-                        return false;
-                    }
-
-                    // If the section is fully scheduled, continue to the next iteration
-                    if (isSectionFullyScheduled(section, schedules)) {
-                        continue;
-                    }
-
                     schedule.setSection(section);
 
                     // Make room unavailable
@@ -160,7 +202,13 @@ public class ScheduleService {
 
                     // Check for any constraint violations
                     if (evaluateSchedule(schedules) >= 0) {
-                        return true;
+                        // If the course has been scheduled for the number of classes required, return true
+                        if (getScheduledClassesForSection(section, schedules) >= section.getNumberOfClasses()) {
+                            return true;
+                        } else {
+                            // Continue scheduling the course until it has been scheduled for the required number of classes
+                            continue;
+                        }
                     } else {
                         // If the schedule is not valid, remove it from the schedule repository and the schedules list
                         scheduleRepository.delete(schedule);
@@ -185,6 +233,18 @@ public class ScheduleService {
         // We should return false here to signal that we couldn't find a valid schedule for this course.
         return false;
     }
+
+    // Add this new helper method to get the number of scheduled classes for a section
+    private int getScheduledClassesForSection(Section section, List<Schedule> schedules) {
+        int count = 0;
+        for (Schedule schedule : schedules) {
+            if (schedule.getSection().equals(section)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
 
 
 

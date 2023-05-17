@@ -4,6 +4,9 @@ import com.kyalo.universitytimetabling.domain.converter.LocalTimeAttributeConver
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "time_slots")
@@ -63,5 +66,19 @@ public class TimeSlot {
 
     public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
+    }
+
+    public String getTime() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
+        return startTime.format(dtf) + " - " + endTime.format(dtf);
+    }
+
+    @OneToMany(mappedBy = "timeSlot")
+    private List<Schedule> schedules;
+
+    public List<String> getAllTimes() {
+        return schedules.stream()
+                .map(schedule -> schedule.getTimeSlot().getDay() + ": " + getTime())
+                .collect(Collectors.toList());
     }
 }

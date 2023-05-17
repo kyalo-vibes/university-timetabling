@@ -34,16 +34,12 @@ public class ScheduleController {
         }
     }
 
-    @GetMapping("/program/{programId}/year/{year}")
-    public ResponseEntity<ScheduleResult> getScheduleByProgramAndYear(@PathVariable Long programId, @PathVariable int year, @RequestParam int semester) {
-        try {
-            Program program = programService.getProgramById(programId); // Assume that programService.getProgramById() method exists to fetch a Program by its ID
-            ScheduleResult scheduleResult = scheduleService.generateYearlySchedule(semester, year, program);
-
-            return ResponseEntity.ok(scheduleResult);
-        } catch (Exception e) {
-            // In case of a bad request or an exception, return an empty ResponseEntity
-            return ResponseEntity.badRequest().build();
-        }
+    @GetMapping("/{programId}/{year}/{semester}")
+    public Map<String, ScheduleResult> getSchedulesForProgramIdYearAndSemester(
+            @PathVariable Long programId,
+            @PathVariable int year,
+            @PathVariable int semester) {
+        return scheduleService.getSchedulesForProgramIdYearAndSemester(programId, year, semester);
     }
+
 }
