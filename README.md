@@ -113,3 +113,4 @@ You can find the API documentation at `http://localhost:8080/swagger-ui.html` wh
 
 ## Set up Demo
 
+https://github.com/kyalo-vibes/university-timetabling/assets/95200602/3d805bc9-7de9-4224-884d-b08f29fe5330
