@@ -106,7 +106,42 @@ public class ScheduleService {
     }
 
 
+    public Map<String, ScheduleResult> getSchedulesForInstructorId(Long instructorId) {
+        Map<String, ScheduleResult> scheduleResults = new HashMap<>();
 
+        // Get all the schedules from the database
+        List<Schedule> schedules = scheduleRepository.findAll();
+
+        // Initialize lists to store the multiple values for each ScheduleResult field
+        List<String> courseCodes = new ArrayList<>();
+        List<String> roomNames = new ArrayList<>();
+        List<String> timeSlots = new ArrayList<>();
+
+        // Filter the schedules based on the instructorId
+        for (Schedule schedule : schedules) {
+            Instructor instructor = schedule.getCourse().getInstructor();
+            if (instructor.getId().equals(instructorId)) {
+                // Add the values to the respective lists
+                courseCodes.add(schedule.getCourse().getCourseCode());
+                roomNames.add(schedule.getRoom().getRoomName());
+                timeSlots.add(schedule.getTimeSlot().getTime());
+            }
+        }
+
+        // If there are any matching schedules, create a ScheduleResult and add it to the map
+        if (!courseCodes.isEmpty()) {
+            String key = "Instructor " + schedules.get(0).getCourse().getInstructor().getFirstName(); // Use instructor name instead of ID
+            ScheduleResult result = new ScheduleResult();
+            result.setCourseCodes(courseCodes);
+            result.setInstructorNames(Arrays.asList(schedules.get(0).getCourse().getInstructor().getFirstName()));
+            result.setRoomNames(roomNames);
+            result.setTimeSlots(timeSlots);
+            result.setMessage(key);
+            scheduleResults.put(key, result);
+        }
+
+        return scheduleResults;
+    }
 
 
     @Transactional

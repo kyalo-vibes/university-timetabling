@@ -4,6 +4,7 @@ import com.kyalo.universitytimetabling.domain.Program;
 import com.kyalo.universitytimetabling.domain.ScheduleResult;
 import com.kyalo.universitytimetabling.service.ProgramService;
 import com.kyalo.universitytimetabling.service.ScheduleService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +41,15 @@ public class ScheduleController {
             @PathVariable int year,
             @PathVariable int semester) {
         return scheduleService.getSchedulesForProgramIdYearAndSemester(programId, year, semester);
+    }
+
+    @GetMapping("/schedules/instructor/{instructorId}")
+    public ResponseEntity<Map<String, ScheduleResult>> getSchedulesForInstructorId(@PathVariable Long instructorId) {
+        Map<String, ScheduleResult> scheduleResults = scheduleService.getSchedulesForInstructorId(instructorId);
+        if(scheduleResults.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(scheduleResults, HttpStatus.OK);
     }
 
 }
