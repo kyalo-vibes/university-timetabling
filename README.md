@@ -32,52 +32,52 @@ This project provides an API for managing a class schedule at a university level
 ## Project Structure
 
 The project is organized as follows:
-
 com.kyalo.universitytimetabling
 │
 ├── domain
-│ ├── Course.java
-│ ├── Department.java
-│ ├── Faculty.java
-│ ├── Instructor.java
-│ ├── Program.java
-│ ├── Room.java
-│ ├── Schedule.java
-│ ├── Section.java
-│ └── TimeSlot.java
+│   ├── Course.java
+│   ├── Department.java
+│   ├── Faculty.java
+│   ├── Instructor.java
+│   ├── Program.java
+│   ├── Room.java
+│   ├── Schedule.java
+│   ├── Section.java
+│   └── TimeSlot.java
 │
 ├── repository
-│ ├── CourseRepository.java
-│ ├── DepartmentRepository.java
-│ ├── FacultyRepository.java
-│ ├── InstructorRepository.java
-│ ├── ProgramRepository.java
-│ ├── RoomRepository.java
-│ ├── ScheduleRepository.java
-│ ├── SectionRepository.java
-│ └── TimeSlotRepository.java
+│   ├── CourseRepository.java
+│   ├── DepartmentRepository.java
+│   ├── FacultyRepository.java
+│   ├── InstructorRepository.java
+│   ├── ProgramRepository.java
+│   ├── RoomRepository.java
+│   ├── ScheduleRepository.java
+│   ├── SectionRepository.java
+│   └── TimeSlotRepository.java
 │
 ├── service
-│ ├── CourseService.java
-│ ├── DepartmentService.java
-│ ├── FacultyService.java
-│ ├── InstructorService.java
-│ ├── ProgramService.java
-│ ├── RoomService.java
-│ ├── ScheduleService.java
-│ ├── SectionService.java
-│ └── TimeSlotService.java
+│   ├── CourseService.java
+│   ├── DepartmentService.java
+│   ├── FacultyService.java
+│   ├── InstructorService.java
+│   ├── ProgramService.java
+│   ├── RoomService.java
+│   ├── ScheduleService.java
+│   ├── SectionService.java
+│   └── TimeSlotService.java
 │
 └── controller
-├── CourseController.java
-├── DepartmentController.java
-├── FacultyController.java
-├── InstructorController.java
-├── ProgramController.java
-├── RoomController.java
-├── ScheduleController.java
-├── SectionController.java
-└── TimeSlotController.java
+    ├── CourseController.java
+    ├── DepartmentController.java
+    ├── FacultyController.java
+    ├── InstructorController.java
+    ├── ProgramController.java
+    ├── RoomController.java
+    ├── ScheduleController.java
+    ├── SectionController.java
+    └── TimeSlotController.java
+
 
 
 ## Getting Started
@@ -112,4 +112,6 @@ The server will start, and you can access the API at `http://localhost:8080`.
 ## API Documentation
 
 You can find the API documentation at `http://localhost:8080/swagger-ui.html` when the server is running.
+
+## Set up Demo
 
