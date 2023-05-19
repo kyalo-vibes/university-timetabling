@@ -2,6 +2,7 @@ package com.kyalo.universitytimetabling.domain;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -28,9 +29,9 @@ public class Room {
     @Column(name = "is_available")
     private boolean isAvailable;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "dept_id", nullable = false)
-    @JsonBackReference
+    @JsonManagedReference("room-department")
     private Department department;
 
     @ManyToMany

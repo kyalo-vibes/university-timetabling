@@ -1,13 +1,17 @@
 package com.kyalo.universitytimetabling.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.kyalo.universitytimetabling.domain.converter.LocalTimeAttributeConverter;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "time_slots")
 public class TimeSlot {
@@ -73,8 +77,9 @@ public class TimeSlot {
         return startTime.format(dtf) + " - " + endTime.format(dtf);
     }
 
-    @OneToMany(mappedBy = "timeSlot")
-    private List<Schedule> schedules;
+    @OneToMany(mappedBy = "timeSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("timeSlot-schedule")
+    private List<Schedule> schedules = new ArrayList<>();
 
     public List<String> getAllTimes() {
         return schedules.stream()

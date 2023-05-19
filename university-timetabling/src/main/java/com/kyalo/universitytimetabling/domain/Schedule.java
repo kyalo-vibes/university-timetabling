@@ -12,17 +12,17 @@ public class Schedule {
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "course_id")
-    @JsonBackReference
+    @JsonBackReference("course-schedule")
     private Course course;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "room_id")
-    @JsonBackReference
+    @JsonBackReference("room-schedule")
     private Room room;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "time_slot_id")
-    @JsonBackReference
+    @JsonBackReference("timeSlot-schedule")
     private TimeSlot timeSlot;
 
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)

@@ -1,6 +1,7 @@
 package com.kyalo.universitytimetabling.service;
 
 import com.kyalo.universitytimetabling.domain.TimeSlot;
+import com.kyalo.universitytimetabling.domain.TimeSlotDTO;
 import com.kyalo.universitytimetabling.repository.TimeSlotRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TimeSlotService {
@@ -19,26 +21,47 @@ public class TimeSlotService {
         this.timeSlotRepository = timeSlotRepository;
     }
 
-    public List<TimeSlot> getAllTimeSlots() {
-        return timeSlotRepository.findAll();
-    }
+    public List<TimeSlotDTO> getAllTimeSlots() {
+        List<TimeSlot> timeSlots = timeSlotRepository.findAll();
 
+        List<TimeSlotDTO> timeSlotDTOs = timeSlots.stream()
+                .map(timeSlot -> new TimeSlotDTO(
+                        timeSlot.getDay(),
+                        timeSlot.getStartTime(),
+                        timeSlot.getEndTime())
+                )
+                .collect(Collectors.toList());
+
+        return timeSlotDTOs;
+    }
     public Optional<TimeSlot> getTimeSlotById(Long id) {
         return timeSlotRepository.findById(id);
     }
 
-    public TimeSlot createTimeSlot(TimeSlot timeSlot) {
+    public TimeSlot createTimeSlot(TimeSlotDTO timeSlotDto) {
+        TimeSlot timeSlot = new TimeSlot();
+        timeSlot.setDay(timeSlotDto.getDay());
+        timeSlot.setStartTime(timeSlotDto.getStartTime());
+        timeSlot.setEndTime(timeSlotDto.getEndTime());
+
         return timeSlotRepository.save(timeSlot);
     }
-
-    public TimeSlot updateTimeSlot(TimeSlot timeSlot) {
-        Optional<TimeSlot> timeSlotOptional = timeSlotRepository.findById(timeSlot.getId());
+    public TimeSlotDTO updateTimeSlot(Long id, TimeSlotDTO timeSlotDto) {
+        Optional<TimeSlot> timeSlotOptional = timeSlotRepository.findById(id);
         if (timeSlotOptional.isPresent()) {
-            return timeSlotRepository.save(timeSlot);
+            TimeSlot timeSlot = timeSlotOptional.get();
+            timeSlot.setDay(timeSlotDto.getDay());
+            timeSlot.setStartTime(timeSlotDto.getStartTime());
+            timeSlot.setEndTime(timeSlotDto.getEndTime());
+
+            TimeSlot updatedTimeSlot = timeSlotRepository.save(timeSlot);
+
+            return new TimeSlotDTO(updatedTimeSlot.getDay(), updatedTimeSlot.getStartTime(), updatedTimeSlot.getEndTime());
         } else {
-            throw new EntityNotFoundException("TimeSlot not found with id: " + timeSlot.getId());
+            throw new EntityNotFoundException("TimeSlot not found with id: " + id);
         }
     }
+
 
 
     public void deleteTimeSlot(Long id) {

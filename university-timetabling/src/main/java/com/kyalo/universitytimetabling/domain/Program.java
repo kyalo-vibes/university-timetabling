@@ -1,5 +1,6 @@
 package com.kyalo.universitytimetabling.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
@@ -20,8 +21,13 @@ public class Program {
     private String name;
 
     @OneToMany(mappedBy = "program", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @JsonManagedReference("program-course")
     private List<Course> courses;
+
+    @ManyToOne
+    @JoinColumn(name = "faculty_id")
+    @JsonBackReference("faculty-program")
+    private Faculty faculty;
 
     public Program() {
     }
@@ -61,5 +67,13 @@ public class Program {
 
     public void setCourses(List<Course> courses) {
         this.courses = courses;
+    }
+
+    public Faculty getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
     }
 }

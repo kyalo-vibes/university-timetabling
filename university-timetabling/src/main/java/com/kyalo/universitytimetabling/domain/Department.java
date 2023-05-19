@@ -27,15 +27,15 @@ public class Department {
 
     @ManyToOne
     @JoinColumn(name = "faculty_id")
-    @JsonBackReference
+    @JsonBackReference("faculty-department")
     private Faculty faculty;
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonManagedReference("department-course")
     private List<Course> courses = new ArrayList<>();
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonBackReference("room-department")
     private List<Room> rooms = new ArrayList<>();
 
     public Department() {

@@ -1,6 +1,7 @@
 package com.kyalo.universitytimetabling.controller;
 
 import com.kyalo.universitytimetabling.domain.Program;
+import com.kyalo.universitytimetabling.domain.ProgrammeDTO;
 import com.kyalo.universitytimetabling.service.ProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,16 +22,18 @@ public class ProgramController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Program>> getAllPrograms() {
-        List<Program> programs = programService.getAllPrograms();
-        return new ResponseEntity<>(programs, HttpStatus.OK);
+    public ResponseEntity<List<ProgrammeDTO>> getAllPrograms() {
+        List<ProgrammeDTO> programDTOs = programService.getAllPrograms();
+        return new ResponseEntity<>(programDTOs, HttpStatus.OK);
     }
 
+
     @PostMapping
-    public ResponseEntity<Program> createProgram(@RequestBody Program program) {
-        Program savedProgram = programService.saveProgram(program);
+    public ResponseEntity<Program> createProgram(@RequestBody ProgrammeDTO programmeDto) {
+        Program savedProgram = programService.createProgramme(programmeDto);
         return new ResponseEntity<>(savedProgram, HttpStatus.CREATED);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Program> getProgramById(@PathVariable("id") Long id) {
@@ -39,13 +42,11 @@ public class ProgramController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Program> updateProgram(@PathVariable("id") Long id, @RequestBody Program programDetails) {
-        Program existingProgram = programService.getProgramById(id);
-        existingProgram.setName(programDetails.getName());
-        existingProgram.setCourses(programDetails.getCourses());
-        Program updatedProgram = programService.saveProgram(existingProgram);
-        return new ResponseEntity<>(updatedProgram, HttpStatus.OK);
+    public ResponseEntity<ProgrammeDTO> updateProgram(@PathVariable("id") Long id, @RequestBody ProgrammeDTO programmeDTO) {
+        ProgrammeDTO updatedProgramDTO = programService.updateProgram(id, programmeDTO);
+        return new ResponseEntity<>(updatedProgramDTO, HttpStatus.OK);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProgram(@PathVariable("id") Long id) {

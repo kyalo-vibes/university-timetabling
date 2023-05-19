@@ -1,6 +1,7 @@
 package com.kyalo.universitytimetabling.controller;
 
 import com.kyalo.universitytimetabling.domain.Course;
+import com.kyalo.universitytimetabling.domain.CourseDTO;
 import com.kyalo.universitytimetabling.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,20 +23,17 @@ public class CourseController {
     }
 
     @PostMapping
-    public ResponseEntity<Course> createCourse(@RequestBody Course course) {
-        Course createdCourse = courseService.createCourse(course);
-        return new ResponseEntity<>(createdCourse, HttpStatus.CREATED);
+    public ResponseEntity<Course> createCourse(@RequestBody CourseDTO courseDto) {
+        Course savedCourse = courseService.createCourse(courseDto);
+        return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Course> updateCourse(@PathVariable Long id, @RequestBody Course course) {
-        Optional<Course> updatedCourseOptional = courseService.updateCourse(id, course);
-        if (updatedCourseOptional.isPresent()) {
-            return new ResponseEntity<>(updatedCourseOptional.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<CourseDTO> updateCourse(@PathVariable Long id, @RequestBody CourseDTO courseDTO) {
+        CourseDTO updatedCourseDTO = courseService.updateCourse(id, courseDTO);
+        return new ResponseEntity<>(updatedCourseDTO, HttpStatus.OK);
     }
+
 
 
     @DeleteMapping("/{id}")
@@ -56,8 +54,8 @@ public class CourseController {
 
 
     @GetMapping
-    public ResponseEntity<List<Course>> getAllCourses() {
-        List<Course> courses = courseService.getAllCourses();
+    public ResponseEntity<List<CourseDTO>> getAllCourses() {
+        List<CourseDTO> courses = courseService.getAllCourses();
         return new ResponseEntity<>(courses, HttpStatus.OK);
     }
 }

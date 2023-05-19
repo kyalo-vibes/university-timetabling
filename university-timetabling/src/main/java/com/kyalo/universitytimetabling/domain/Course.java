@@ -31,21 +31,21 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "programme_id")
-    @JsonBackReference
+    @JsonBackReference("program-course")
     private Program program;
 
     @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonBackReference("course-section")
     private Section section;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dept_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("department-course")
     private Department department;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instructor_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("instructor-course")
     private Instructor instructor;
 
 

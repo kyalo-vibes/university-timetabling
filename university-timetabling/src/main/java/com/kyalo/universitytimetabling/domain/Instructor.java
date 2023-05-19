@@ -28,11 +28,11 @@ public class Instructor {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "dept_id", nullable = false)
-    @JsonManagedReference
+    @JsonManagedReference("instructor-department")
     private Department department;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JsonBackReference
+    @JsonBackReference("preference-instructor")
     @JoinTable(
             name = "instructor_preferences",
             joinColumns = @JoinColumn(name = "instructor_id"),

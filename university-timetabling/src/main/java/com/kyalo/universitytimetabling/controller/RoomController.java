@@ -1,6 +1,7 @@
 package com.kyalo.universitytimetabling.controller;
 
 import com.kyalo.universitytimetabling.domain.Room;
+import com.kyalo.universitytimetabling.domain.RoomDTO;
 import com.kyalo.universitytimetabling.service.RoomService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +23,16 @@ public class RoomController {
     }
 
     @PostMapping
-    public ResponseEntity<Room> createRoom(@RequestBody Room room) {
-        Room createdRoom = roomService.createRoom(room);
+    public ResponseEntity<Room> createRoom(@RequestBody RoomDTO roomDto) {
+        Room createdRoom = roomService.createRoom(roomDto);
         return new ResponseEntity<>(createdRoom, HttpStatus.CREATED);
     }
 
+
     @PutMapping("/{id}")
-    public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody Room room) {
-        room.setId(id);
-        Room updatedRoom = roomService.updateRoom(room);
-        return new ResponseEntity<>(updatedRoom, HttpStatus.OK);
+    public ResponseEntity<RoomDTO> updateRoom(@PathVariable Long id, @RequestBody RoomDTO roomDto) {
+        RoomDTO updatedRoomDto = roomService.updateRoom(id, roomDto);
+        return new ResponseEntity<>(updatedRoomDto, HttpStatus.OK);
     }
 
 
@@ -47,10 +48,9 @@ public class RoomController {
         return new ResponseEntity<>(room, HttpStatus.OK);
     }
 
-
     @GetMapping
-    public ResponseEntity<List<Room>> getAllRooms() {
-        List<Room> rooms = roomService.getAllRooms();
-        return new ResponseEntity<>(rooms, HttpStatus.OK);
+    public ResponseEntity<List<RoomDTO>> getAllRooms() {
+        List<RoomDTO> roomDtos = roomService.getAllRooms();
+        return new ResponseEntity<>(roomDtos, HttpStatus.OK);
     }
 }
