@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { MdDelete } from "react-icons/md";
 
 const Instructor = () => {
   const [instructors, setInstructors] = useState([]);
@@ -138,65 +139,75 @@ const Instructor = () => {
         </div>
       </form>
 
-      <section>
-        <h2 className="text-lg font-semibold mb-4">Existing Instructors</h2>
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr>
-              <th className="py-2 px-3 font-bold uppercase text-xs text-gray-700 border-b border-gray-200">
-                First Name
-              </th>
-              <th className="py-2 px-3 font-bold uppercase text-xs text-gray-700 border-b border-gray-200">
-                Last Name
-              </th>
-              <th className="py-2 px-3 font-bold uppercase text-xs text-gray-700 border-b border-gray-200">
-                Department Name
-              </th>
-              <th className="py-2 px-3 font-bold uppercase text-xs text-gray-700 border-b border-gray-200">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentRecords.map((instructor, index) => (
-              <tr key={index}>
-                <td className="py-2 px-3 border-b border-gray-200">
-                  {instructor.firstName}
-                </td>
-                <td className="py-2 px-3 border-b border-gray-200">
-                  {instructor.lastName}
-                </td>
-                <td className="py-2 px-3 border-b border-gray-200">
-                  {instructor.deptName}
-                </td>
-                <td className="py-2 px-3 border-b border-gray-200">
-                  {/* Provide Edit/Delete functionality here */}
-                  <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => handleDelete(instructor.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+      <section className="">
+        <div className="w-4/5 max-w-lg mx-auto">
+          <h2 className="text-lg font-semibold mb-4">Existing Instructors</h2>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr>
+                <th className="py-2 px-3 font-bold uppercase text-xs text-gray-700 border-b border-gray-200">
+                  First Name
+                </th>
+                <th className="py-2 px-3 font-bold uppercase text-xs text-gray-700 border-b border-gray-200">
+                  Last Name
+                </th>
+                <th className="py-2 px-3 font-bold uppercase text-xs text-gray-700 border-b border-gray-200">
+                  Department Name
+                </th>
+                <th className="py-2 px-3 font-bold uppercase text-xs text-gray-700 border-b border-gray-200">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentRecords.map((instructor, index) => (
+                <tr key={index}>
+                  <td className="py-2 px-3 border-b border-gray-200">
+                    {instructor.firstName}
+                  </td>
+                  <td className="py-2 px-3 border-b border-gray-200">
+                    {instructor.lastName}
+                  </td>
+                  <td className="py-2 px-3 border-b border-gray-200">
+                    {instructor.deptName}
+                  </td>
+                  <td className="py-2 px-3 border-b border-gray-200">
+                    {/* Provide Edit/Delete functionality here */}
+                    <div className="flex items-center ">
+                      <MdDelete
+                        fontSize={20}
+                        className="text-red-400"
+                        onClick={() => handleDelete(instructor.id)}
+                      />
 
-        <div className="flex justify-between mt-4">
-          <button
-            className="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
-            disabled={isFirstPage}
-            onClick={handlePreviousPage}
-          >
-            Previous
-          </button>
-          <button
-            className="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
-            onClick={handleNextPage}
-          >
-            Next
-          </button>
+                      <button
+                        className="text-purple-600 hover:text-purple-400 font-semibold ml-6"
+                        onClick={() => handleDelete(instructor.id)}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="flex justify-between mt-4">
+            <button
+              className="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+              disabled={isFirstPage}
+              onClick={handlePreviousPage}
+            >
+              Previous
+            </button>
+            <button
+              className="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+              onClick={handleNextPage}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </section>
     </main>
