@@ -176,7 +176,7 @@ const Instructor = () => {
                     <div className="flex items-center ">
                       <MdDelete
                         fontSize={20}
-                        className="text-red-400"
+                        className="text-rose-500"
                         onClick={() => handleDelete(instructor.id)}
                       />
 
