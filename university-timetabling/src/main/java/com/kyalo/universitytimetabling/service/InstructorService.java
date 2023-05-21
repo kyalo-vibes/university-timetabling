@@ -31,6 +31,7 @@ public class InstructorService {
         return instructorRepository.findAll().stream()
                 .map(instructor -> {
                     InstructorDTO dto = new InstructorDTO();
+                    dto.setId(instructor.getId());
                     dto.setFirstName(instructor.getFirstName());
                     dto.setLastName(instructor.getLastName());
                     dto.setDeptName(instructor.getDepartment().getName()); // Assuming that the department is another entity with its own name
@@ -131,11 +132,14 @@ public class InstructorService {
                 .map(instructor -> {
                     InstructorPreferencesDto dto = new InstructorPreferencesDto();
                     dto.setInstructorName(instructor.getFirstName() + " " + instructor.getLastName());
-                    dto.setPreferences(instructor.getPreferences().stream().map(timeSlot ->
-                            new PreferenceDto(timeSlot.getDay(), timeSlot.getStartTime())
-                    ).collect(Collectors.toSet()));
+                    dto.setPreferences(instructor.getPreferences().stream().map(timeSlot -> {
+                        PreferenceDto preferenceDto = new PreferenceDto(timeSlot.getDay(), timeSlot.getStartTime());
+                        preferenceDto.setId(timeSlot.getId());  // Assuming TimeSlot has an 'id' property.
+                        return preferenceDto;
+                    }).collect(Collectors.toSet()));
                     return dto;
                 }).collect(Collectors.toList());
     }
+
 
 }

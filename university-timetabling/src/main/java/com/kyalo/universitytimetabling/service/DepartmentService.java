@@ -59,6 +59,7 @@ public class DepartmentService {
 
             Department updatedDepartment = departmentRepository.save(department);
             return new DepartmentDTO(
+                    updatedDepartment.getId(),
                     updatedDepartment.getDept_code(),
                     updatedDepartment.getName(),
                     updatedDepartment.getFaculty().getFacultyName());
@@ -82,6 +83,7 @@ public class DepartmentService {
         for (Department department : departments) {
             Faculty faculty = department.getFaculty();
             DepartmentDTO departmentDTO = new DepartmentDTO(
+                    department.getId(),
                     department.getDept_code(),
                     department.getName(),
                     faculty != null ? faculty.getFacultyName() : null);

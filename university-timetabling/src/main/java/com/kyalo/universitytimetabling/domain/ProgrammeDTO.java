@@ -1,6 +1,7 @@
 package com.kyalo.universitytimetabling.domain;
 
 public class ProgrammeDTO {
+    private Long id;
     private String programmeCode;
     private String programmeName;
     private String facultyName;
@@ -15,6 +16,15 @@ public class ProgrammeDTO {
     }
 
     // getters and setters
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getProgrammeCode() {
         return programmeCode;

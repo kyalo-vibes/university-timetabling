@@ -23,7 +23,7 @@ public class FacultyService {
 
     public List<FacultyDTO> getAllFaculties() {
         return facultyRepository.findAll().stream()
-                .map(faculty -> new FacultyDTO(faculty.getFacultyCode(), faculty.getFacultyName()))
+                .map(faculty -> new FacultyDTO(faculty.getId(), faculty.getFacultyCode(), faculty.getFacultyName()))
                 .collect(Collectors.toList());
     }
     public Optional<Faculty> getFacultyById(Long id) {
@@ -43,7 +43,7 @@ public class FacultyService {
             faculty.setFacultyCode(facultyDTO.getFacultyCode());
             faculty.setFacultyName(facultyDTO.getFacultyName());
             Faculty updatedFaculty = facultyRepository.save(faculty);
-            return new FacultyDTO(updatedFaculty.getFacultyCode(), updatedFaculty.getFacultyName());
+            return new FacultyDTO(updatedFaculty.getId(), updatedFaculty.getFacultyCode(), updatedFaculty.getFacultyName());
         } else {
             throw new EntityNotFoundException("Faculty not found with id: " + id);
         }

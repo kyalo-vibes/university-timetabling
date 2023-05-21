@@ -1,6 +1,7 @@
 package com.kyalo.universitytimetabling.domain;
 
 public class RoomDTO {
+    private Long id;
     private String roomName;
     private int roomCapacity;
     private String roomType;
@@ -10,7 +11,8 @@ public class RoomDTO {
     public RoomDTO() {
     }
 
-    public RoomDTO(String roomName, int roomCapacity, String roomType, boolean isAvailable, String deptName) {
+    public RoomDTO(Long id, String roomName, int roomCapacity, String roomType, boolean isAvailable, String deptName) {
+        this.id = id;
         this.roomName = roomName;
         this.roomCapacity = roomCapacity;
         this.roomType = roomType;
@@ -19,6 +21,15 @@ public class RoomDTO {
     }
 
     // getters and setters
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getRoomName() {
         return roomName;

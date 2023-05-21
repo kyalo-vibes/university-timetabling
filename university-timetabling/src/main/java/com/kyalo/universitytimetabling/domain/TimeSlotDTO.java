@@ -3,6 +3,7 @@ package com.kyalo.universitytimetabling.domain;
 import java.time.LocalTime;
 
 public class TimeSlotDTO {
+    private Long id;
     private String day;
     private LocalTime startTime;
     private LocalTime endTime;
@@ -10,13 +11,23 @@ public class TimeSlotDTO {
     public TimeSlotDTO() {
     }
 
-    public TimeSlotDTO(String day, LocalTime startTime, LocalTime endTime) {
+    public TimeSlotDTO(Long id, String day, LocalTime startTime, LocalTime endTime) {
+        this.id = id;
         this.day = day;
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
     // getters and setters
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getDay() {
         return day;

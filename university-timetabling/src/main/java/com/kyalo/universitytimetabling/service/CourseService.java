@@ -36,6 +36,7 @@ public class CourseService {
 
     private CourseDTO convertToDTO(Course course) {
         CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setId(course.getId());
         courseDTO.setCourseCode(course.getCourseCode());
         courseDTO.setCourseName(course.getCourseName());
         courseDTO.setYear(course.getYear());
