@@ -1,6 +1,7 @@
 package com.kyalo.universitytimetabling.domain;
 
 public class DepartmentDTO {
+    private Long id;
     private String deptCode;
     private String deptName;
     private String facultyName;
@@ -8,13 +9,23 @@ public class DepartmentDTO {
     public DepartmentDTO() {
     }
 
-    public DepartmentDTO(String deptCode, String deptName, String facultyName) {
+    public DepartmentDTO(Long id, String deptCode, String deptName, String facultyName) {
+        this.id = id;
         this.deptCode = deptCode;
         this.deptName = deptName;
         this.facultyName = facultyName;
     }
 
     // getters and setters
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getDeptCode() {
         return deptCode;

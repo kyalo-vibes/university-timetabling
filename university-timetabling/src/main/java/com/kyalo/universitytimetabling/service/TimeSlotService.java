@@ -26,6 +26,7 @@ public class TimeSlotService {
 
         List<TimeSlotDTO> timeSlotDTOs = timeSlots.stream()
                 .map(timeSlot -> new TimeSlotDTO(
+                        timeSlot.getId(),
                         timeSlot.getDay(),
                         timeSlot.getStartTime(),
                         timeSlot.getEndTime())
@@ -56,7 +57,7 @@ public class TimeSlotService {
 
             TimeSlot updatedTimeSlot = timeSlotRepository.save(timeSlot);
 
-            return new TimeSlotDTO(updatedTimeSlot.getDay(), updatedTimeSlot.getStartTime(), updatedTimeSlot.getEndTime());
+            return new TimeSlotDTO(updatedTimeSlot.getId(), updatedTimeSlot.getDay(), updatedTimeSlot.getStartTime(), updatedTimeSlot.getEndTime());
         } else {
             throw new EntityNotFoundException("TimeSlot not found with id: " + id);
         }

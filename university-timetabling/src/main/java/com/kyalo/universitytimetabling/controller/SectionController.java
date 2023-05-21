@@ -3,6 +3,7 @@ package com.kyalo.universitytimetabling.controller;
 import com.kyalo.universitytimetabling.domain.Section;
 import com.kyalo.universitytimetabling.domain.SectionDTO;
 import com.kyalo.universitytimetabling.service.SectionService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +19,14 @@ public class SectionController {
     private SectionService sectionService;
 
     @GetMapping
-    public ResponseEntity<List<SectionDTO>> findAll() {
-        List<SectionDTO> sections = sectionService.findAll();
+    public ResponseEntity<List<SectionDTO>> getAllSections() {
+        List<SectionDTO> sections = sectionService.getAllSections();
         return new ResponseEntity<>(sections, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Section> findById(@PathVariable Long id) {
-        Section section = sectionService.findById(id);
+    public ResponseEntity<Section> getSectionById(@PathVariable Long id) {
+        Section section = sectionService.getSectionById(id);
         if (section != null) {
             return new ResponseEntity<>(section, HttpStatus.OK);
         } else {
@@ -40,23 +41,21 @@ public class SectionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SectionDTO> update(@PathVariable Long id, @RequestBody SectionDTO sectionDTO) {
-        SectionDTO existingSection = sectionService.updateById(id);
-        if (existingSection != null) {
-            SectionDTO savedSection = sectionService.save(id, sectionDTO);
-            return new ResponseEntity<>(savedSection, HttpStatus.OK);
-        } else {
+    public ResponseEntity<SectionDTO> updateSection(@PathVariable Long id, @RequestBody SectionDTO sectionDTO) {
+        try {
+            SectionDTO updatedSection = sectionService.updateSection(id, sectionDTO);
+            return new ResponseEntity<>(updatedSection, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        Section existingSection = sectionService.findById(id);
-        if (existingSection != null) {
-            sectionService.deleteById(id);
+    public ResponseEntity<Void> deleteSection(@PathVariable Long id) {
+        try {
+            sectionService.deleteSection(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
+        } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

@@ -27,6 +27,7 @@ public class RoomService {
 
     public List<RoomDTO> getAllRooms() {
         return roomRepository.findAll().stream().map(room -> new RoomDTO(
+                room.getId(),
                 room.getRoomName(),
                 room.getCapacity(),
                 room.getRoomType(),
@@ -71,6 +72,7 @@ public class RoomService {
             Room updatedRoom = roomRepository.save(room);
 
             return new RoomDTO(
+                    updatedRoom.getId(),
                     updatedRoom.getRoomName(),
                     updatedRoom.getCapacity(),
                     updatedRoom.getRoomType(),

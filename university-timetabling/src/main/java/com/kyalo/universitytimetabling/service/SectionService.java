@@ -9,34 +9,20 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class SectionService {
 
-    @Autowired
-    private SectionRepository sectionRepository;
+    private final SectionRepository sectionRepository;
+    private final CourseRepository courseRepository;
 
     @Autowired
-    private CourseRepository courseRepository;
-
-    public List<SectionDTO> findAll() {
-        List<Section> sections = sectionRepository.findAll();
-
-        // map each Section entity to a SectionDTO
-        List<SectionDTO> sectionDTOs = sections.stream().map(section -> {
-            return new SectionDTO(
-                    section.getNumberOfClasses(),
-                    section.getCourse().getCourseName());
-        }).collect(Collectors.toList());
-
-        return sectionDTOs;
-    }
-
-    public Section findById(Long id) {
-        return sectionRepository.findById(id).orElse(null);
+    public SectionService(SectionRepository sectionRepository, CourseRepository courseRepository) {
+        this.sectionRepository = sectionRepository;
+        this.courseRepository = courseRepository;
     }
 
     public Section createSection(SectionDTO sectionDto) {
@@ -52,35 +38,50 @@ public class SectionService {
         return sectionRepository.save(section);
     }
 
-    public void deleteById(Long id) {
+    public SectionDTO updateSection(Long id, SectionDTO sectionDTO) {
+        Optional<Section> sectionOptional = sectionRepository.findById(id);
+        if (sectionOptional.isPresent()) {
+            Section section = sectionOptional.get();
+            section.setNumberOfClasses(sectionDTO.getNumberOfClasses());
+
+            Optional<Course> course = courseRepository.findByCourseName(sectionDTO.getCourseName());
+            if (!course.isPresent()) {
+                throw new EntityNotFoundException("Course not found with name: " + sectionDTO.getCourseName());
+            }
+            section.setCourse(course.get());
+
+            Section updatedSection = sectionRepository.save(section);
+            return new SectionDTO(
+                    updatedSection.getId(),
+                    updatedSection.getNumberOfClasses(),
+                    updatedSection.getCourse().getCourseName());
+        } else {
+            throw new EntityNotFoundException("Section not found with id: " + id);
+        }
+    }
+
+    public void deleteSection(Long id) {
         sectionRepository.deleteById(id);
     }
 
-    public Section save(Section section) {
-        return sectionRepository.save(section);
+    public Section getSectionById(Long id) {
+        return sectionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Section not found with id: " + id));
     }
 
-    public SectionDTO updateById(Long id) {
-        Optional<Section> optionalSection = sectionRepository.findById(id);
-        if (optionalSection.isPresent()) {
-            Section section = optionalSection.get();
-            return new SectionDTO(section.getNumberOfClasses(), section.getCourse().getCourseName());
+    public List<SectionDTO> getAllSections() {
+        List<Section> sections = sectionRepository.findAll();
+        List<SectionDTO> sectionDTOs = new ArrayList<>();
+
+        for (Section section : sections) {
+            Course course = section.getCourse();
+            SectionDTO sectionDTO = new SectionDTO(
+                    section.getId(),
+                    section.getNumberOfClasses(),
+                    course != null ? course.getCourseName() : null);
+            sectionDTOs.add(sectionDTO);
         }
-        return null;
+
+        return sectionDTOs;
     }
-
-    public SectionDTO save(Long id, SectionDTO sectionDTO) {
-        Optional<Course> optionalCourse = courseRepository.findByCourseName(sectionDTO.getCourseName());
-        if (optionalCourse.isPresent()) {
-            Section section = new Section();
-            section.setId(id);
-            section.setNumberOfClasses(sectionDTO.getNumberOfClasses());
-            section.setCourse(optionalCourse.get());
-
-            Section savedSection = sectionRepository.save(section);
-            return new SectionDTO(savedSection.getNumberOfClasses(), savedSection.getCourse().getCourseName());
-        }
-        throw new EntityNotFoundException("Course not found with name: " + sectionDTO.getCourseName());
-    }
-
 }

@@ -45,6 +45,7 @@ public class ProgramService {
         List<ProgrammeDTO> programDTOs = new ArrayList<>();
         for (Program program : programs) {
             ProgrammeDTO programDTO = new ProgrammeDTO();
+            programDTO.setId(program.getId());
             programDTO.setProgrammeCode(program.getCode());
             programDTO.setProgrammeName(program.getName());
             programDTO.setFacultyName(program.getFaculty().getFacultyName()); // assuming there is a getName() method in Faculty class
