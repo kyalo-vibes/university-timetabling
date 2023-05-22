@@ -1,15 +1,15 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './components/Home';
-import Instructor from './components/Instructor';
-import Room from './components/Room';
-import TimeSlot from './components/TimeSlot';
-import Programme from './components/Programme';
-import Course from './components/Course';
-import Faculty from './components/Faculty';
-import Department from './components/Department';
-import Section from './components/Section';
-import InstructorPreference from './components/InstructorPreference';
-import InstructorTimetable from './components/InstructorTimetable';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from "./components/Home";
+import Instructor from "./pages/instructors/Instructor";
+import Room from "./components/Room";
+import TimeSlot from "./components/TimeSlot";
+import Programme from "./components/Programme";
+import Course from "./components/Course";
+import Faculty from "./components/Faculty";
+import Department from "./components/Department";
+import Section from "./components/Section";
+import InstructorPreference from "./pages/instructors/InstructorPreference";
+import InstructorTimetable from "./pages/instructors/InstructorTimetable";
 
 function App() {
   return (
@@ -24,7 +24,10 @@ function App() {
         <Route path="/faculty" element={<Faculty />} />
         <Route path="/department" element={<Department />} />
         <Route path="/section" element={<Section />} />
-        <Route path="/instructor-preference" element={<InstructorPreference />} />
+        <Route
+          path="/instructor-preference"
+          element={<InstructorPreference />}
+        />
         <Route path="/instructor-timetable" element={<InstructorTimetable />} />
       </Routes>
     </Router>
