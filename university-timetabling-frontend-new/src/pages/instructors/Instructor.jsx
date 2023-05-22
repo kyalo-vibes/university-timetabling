@@ -50,10 +50,7 @@ const Instructor = () => {
     axios
       .get("http://localhost:8080/api/instructors/preferences")
       .then((response) => {
-        const preferencesData = response.data.reduce((acc, instructor) => {
-          acc[instructor.id] = instructor.preferencesData;
-          return acc;
-        }, {});
+        const preferencesData = response.data;
         setAllPreferences(preferencesData);
       })
       .catch((error) => console.error(`Error: ${error}`));
@@ -82,6 +79,7 @@ const Instructor = () => {
       .then((response) => {
         alert("Instructor added");
         fetchInstructors();
+        fetchAllPreferences();
       })
       .catch((error) => console.error(`Error: ${error}`));
   };
@@ -92,9 +90,16 @@ const Instructor = () => {
     fetchAllPreferences();
   }, []);
 
-  function handleDelete() {
-    console.log("Delete instructor");
-  }
+  const handleDelete = (id) => {
+    axios
+      .delete(`http://localhost:8080/api/instructors/${id}`)
+      .then((response) => {
+        // Handle successful delete
+        fetchInstructors();
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+  };
+
   return (
     <div className="instructor-page">
       <Header />
@@ -162,7 +167,16 @@ const Instructor = () => {
             </div>
           </form>
 
-          <div className="instructor-cards">Card Content</div>
+          <section className="instructor-cards">
+            <div className="stat">
+              <div className="stat-title">Total Instructors</div>
+              <div className="stat-value">{instructors.length}</div>
+            </div>
+            <div className="stat">
+              <div className="stat-title">Total Departments</div>
+              <div className="stat-value">{departments.length}</div>
+            </div>
+          </section>
 
           <section className="">
             <div className="w-4/5 max-w-2xl mx-auto">
@@ -205,8 +219,8 @@ const Instructor = () => {
                       </td>
                       <td className="py-2 px-3 border-b border-gray-200">
                         {/* displaying the instructor preference data */}
-                        {allPreferences[instructor.id]
-                          ? allPreferences[instructor.id].map((preference) => (
+                        {allPreferences
+                          ? allPreferences.map((preference) => (
                               <div key={preference.id}>
                                 {preference.day} {preference.startTime}
                               </div>
@@ -217,6 +231,7 @@ const Instructor = () => {
                         {/* Provide Edit/Delete functionality here */}
                         <div className="flex items-center ">
                           <MdDelete
+                            style={{ cursor: "pointer" }}
                             fontSize={20}
                             className="text-rose-500"
                             onClick={() => handleDelete(instructor.id)}
@@ -253,7 +268,26 @@ const Instructor = () => {
             </div>
           </section>
 
-          <section className="preferences"></section>
+          <section className="preferences">
+            <ul className="list-disc list-inside">
+              {allPreferences.map((instructor) => (
+                <li key={instructor.instructorName}>
+                  <span>Instructor Name </span>
+                  {instructor.instructorName}
+                  <ul>
+                    {instructor.preferences.map((preference) => (
+                      <li key={preference.id} className="text-gray-700">
+                        <span>
+                          Preffered Time Slot:
+                          {preference.day} {`${preference.startTime}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </section>
           <section className="timeslots"></section>
         </div>
       </main>
