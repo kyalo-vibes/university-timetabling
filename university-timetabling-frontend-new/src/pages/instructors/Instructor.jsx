@@ -95,9 +95,9 @@ const Instructor = () => {
       .delete(`http://localhost:8080/api/instructors/${id}`)
       .then((response) => {
         // Handle successful delete
-        fetchInstructors();
       })
       .catch((error) => console.error(`Error: ${error}`));
+    fetchInstructors();
   };
 
   return (
@@ -230,12 +230,43 @@ const Instructor = () => {
                       <td className="py-2 px-3 border-b border-gray-200">
                         {/* Provide Edit/Delete functionality here */}
                         <div className="flex items-center ">
-                          <MdDelete
-                            style={{ cursor: "pointer" }}
-                            fontSize={20}
-                            className="text-rose-500"
-                            onClick={() => handleDelete(instructor.id)}
+                          {/* The button to open modal */}
+                          <label htmlFor="my-modal" className="btn btn-warning">
+                            Delete
+                          </label>
+
+                          {/* Put this part before </body> tag */}
+                          <input
+                            type="checkbox"
+                            id="my-modal"
+                            className="modal-toggle"
                           />
+                          <div className="modal">
+                            <div className="modal-box">
+                              <h3 className="font-bold text-lg">
+                                Confirm delete of the instructor?
+                              </h3>
+                              <p className="py-4">
+                                Do you want to delete the instructor, you can
+                                cancel.
+                              </p>
+                              <div className="modal-action">
+                                <label
+                                  htmlFor="my-modal"
+                                  className="btn btn-success"
+                                >
+                                  Cancel
+                                </label>
+                                <label
+                                  htmlFor="my-modal"
+                                  className="btn btn-secondary"
+                                  onClick={() => handleDelete(instructor.id)}
+                                >
+                                  Delete
+                                </label>
+                              </div>
+                            </div>
+                          </div>
 
                           <button
                             className="text-purple-600 hover:text-purple-400 font-semibold ml-6"
