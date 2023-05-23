@@ -4,7 +4,7 @@ import Instructor from "./pages/instructors/Instructor";
 import Room from "./components/Room";
 import TimeSlot from "./components/TimeSlot";
 import Programme from "./components/Programme";
-import Course from "./components/Course";
+import Course from "./pages/courses/Course";
 import Faculty from "./components/Faculty";
 import Department from "./components/Department";
 import Section from "./components/Section";
