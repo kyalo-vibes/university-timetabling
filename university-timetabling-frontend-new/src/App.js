@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import Instructor from "./pages/instructors/Instructor";
-import Room from "./components/Room";
+import Room from "./pages/rooms/Room";
 import TimeSlot from "./components/TimeSlot";
 import Programme from "./components/Programme";
 import Course from "./pages/courses/Course";

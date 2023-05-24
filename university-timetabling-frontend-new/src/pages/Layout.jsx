@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HiOutlineMenuAlt1 } from "react-icons/hi";
 import { MdSpaceDashboard } from "react-icons/md";
+import { SiGoogleclassroom } from "react-icons/si";
 
 export default function Layout({ children }) {
   return (
@@ -80,29 +81,17 @@ export default function Layout({ children }) {
               </Link>
             </li>
             <li>
-              <a
-                href="#"
+              <Link
+                to="/room"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <svg
-                  aria-hidden="true"
-                  className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clip-rule="evenodd"
-                  ></path>
-                </svg>
-                <span className="flex-1 ml-3 whitespace-nowrap">Users</span>
-              </a>
+                <SiGoogleclassroom />
+                <span className="flex-1 ml-3 whitespace-nowrap">Rooms</span>
+              </Link>
             </li>
             <li>
-              <a
-                href="#"
+              <Link
+                to="/section"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <svg
@@ -118,8 +107,8 @@ export default function Layout({ children }) {
                     clip-rule="evenodd"
                   ></path>
                 </svg>
-                <span className="flex-1 ml-3 whitespace-nowrap">Products</span>
-              </a>
+                <span className="flex-1 ml-3 whitespace-nowrap">Sections</span>
+              </Link>
             </li>
           </ul>
         </div>
