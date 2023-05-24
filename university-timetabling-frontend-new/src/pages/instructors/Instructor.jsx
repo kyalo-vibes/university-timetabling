@@ -4,6 +4,7 @@ import axios from "axios";
 import { MdDelete } from "react-icons/md";
 import Header from "../../components/Header";
 import Layout from "../Layout";
+import { BiTimeFive } from "react-icons/bi";
 
 const Instructor = () => {
   const [instructors, setInstructors] = useState([]);
@@ -108,7 +109,7 @@ const Instructor = () => {
           <h1 className="text-3xl font-bold">Instructors</h1>
 
           <div className="main-content--instructors">
-            <section className="instructor-cards">
+            <section className="instructor-cards flex">
               <div className="stat">
                 <div className="stat-title">Total Instructors</div>
                 <div className="stat-value">{instructors.length}</div>
@@ -117,9 +118,28 @@ const Instructor = () => {
                 <div className="stat-title">Total Departments</div>
                 <div className="stat-value">{departments.length}</div>
               </div>
+              <div className="stat">
+                <ul className="list-none list-inside border-gray-700">
+                  {allPreferences.map((instructor) => (
+                    <li className="flex" key={instructor.instructorName}>
+                      {instructor.instructorName}
+                      <ul>
+                        {instructor.preferences.map((preference) => (
+                          <li key={preference.id} className="text-gray-700">
+                            <span className="flex items-center">
+                              <BiTimeFive color="green" />
+                              {preference.day} {`${preference.startTime}`}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </section>
 
-            <section className="">
+            <section className="w-4/5 mx-auto">
               <div className="w-4/5 max-w-2xl mx-auto">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold mb-4">
@@ -327,28 +347,6 @@ const Instructor = () => {
                 </div>
               </div>
             </section>
-
-            <section className="preferences">
-              <ul className="list-disc list-inside">
-                {allPreferences.map((instructor) => (
-                  <li key={instructor.instructorName}>
-                    <span>Instructor Name </span>
-                    {instructor.instructorName}
-                    <ul>
-                      {instructor.preferences.map((preference) => (
-                        <li key={preference.id} className="text-gray-700">
-                          <span>
-                            Preffered Time Slot:
-                            {preference.day} {`${preference.startTime}`}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </section>
-            <section className="timeslots"></section>
           </div>
         </main>
       </div>
