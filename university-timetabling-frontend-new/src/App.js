@@ -7,7 +7,7 @@ import Programme from "./components/Programme";
 import Course from "./pages/courses/Course";
 import Faculty from "./components/Faculty";
 import Department from "./components/Department";
-import Section from "./components/Section";
+import Section from "./pages/section/Section";
 import InstructorPreference from "./pages/instructors/InstructorPreference";
 import InstructorTimetable from "./pages/instructors/InstructorTimetable";
 
