@@ -109,7 +109,7 @@ const Instructor = () => {
           <h1 className="text-3xl font-bold">Instructors</h1>
 
           <div className="main-content--instructors">
-            <section className="instructor-cards flex">
+            <section className="instructor-cards flex my-4">
               <div className="stat">
                 <div className="stat-title">Total Instructors</div>
                 <div className="stat-value">{instructors.length}</div>
@@ -125,9 +125,12 @@ const Instructor = () => {
                       {instructor.instructorName}
                       <ul>
                         {instructor.preferences.map((preference) => (
-                          <li key={preference.id} className="text-gray-700">
+                          <li
+                            key={preference.id}
+                            className="text-gray-700 ml-4"
+                          >
                             <span className="flex items-center">
-                              <BiTimeFive color="green" />
+                              <BiTimeFive color="green" className="mx-4" />
                               {preference.day} {`${preference.startTime}`}
                             </span>
                           </li>
@@ -147,7 +150,7 @@ const Instructor = () => {
                   </h2>
                   <div className="add-instructor ">
                     <label htmlFor="my-modal-4" className="btn">
-                      open modal
+                      add instructor
                     </label>
 
                     {/* Put this part before </body> tag */}

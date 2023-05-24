@@ -7,3 +7,7 @@
   grid-template-columns: 2fr 1fr;
   grid-template-rows: 1fr 2fr;
 } */
+
+.instructor-cards .stat:nth-child(3) {
+  outline: 2px solid salmon;
+}

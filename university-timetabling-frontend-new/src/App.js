@@ -13,24 +13,19 @@ import InstructorTimetable from "./pages/instructors/InstructorTimetable";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/instructor" element={<Instructor />} />
-        <Route path="/room" element={<Room />} />
-        <Route path="/timeslot" element={<TimeSlot />} />
-        <Route path="/programme" element={<Programme />} />
-        <Route path="/course" element={<Course />} />
-        <Route path="/faculty" element={<Faculty />} />
-        <Route path="/department" element={<Department />} />
-        <Route path="/section" element={<Section />} />
-        <Route
-          path="/instructor-preference"
-          element={<InstructorPreference />}
-        />
-        <Route path="/instructor-timetable" element={<InstructorTimetable />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/instructor" element={<Instructor />} />
+      <Route path="/room" element={<Room />} />
+      <Route path="/timeslot" element={<TimeSlot />} />
+      <Route path="/programme" element={<Programme />} />
+      <Route path="/course" element={<Course />} />
+      <Route path="/faculty" element={<Faculty />} />
+      <Route path="/department" element={<Department />} />
+      <Route path="/section" element={<Section />} />
+      <Route path="/instructor-preference" element={<InstructorPreference />} />
+      <Route path="/instructor-timetable" element={<InstructorTimetable />} />
+    </Routes>
   );
 }
 

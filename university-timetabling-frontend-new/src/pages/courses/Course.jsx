@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Form, Container } from "react-bootstrap";
-
+import Layout from "../Layout";
 const Course = () => {
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -89,123 +89,148 @@ const Course = () => {
   }, []);
 
   return (
-    <Container>
-      <h1>Courses</h1>
+    <Layout>
+      <main>
+        <h1 className="font-bold text-3xl">Courses</h1>
 
-      <Form>
-        <Form.Group>
-          <Form.Label htmlFor="course_code">Course Code</Form.Label>
-          <Form.Control
-            type="text"
-            id="course_code"
-            value={courseCode}
-            onChange={(e) => setCourseCode(e.target.value)}
-          />
-        </Form.Group>
+        <form>
+          <div>
+            <label htmlFor="course_code" className="label">
+              Course Code
+            </label>
+            <input
+              className="input input-bordered w-full max-w-[18%]"
+              type="text"
+              id="course_code"
+              value={courseCode}
+              onChange={(e) => setCourseCode(e.target.value)}
+            />
+          </div>
 
-        <Form.Group>
-          <Form.Label htmlFor="course_name">Course Name</Form.Label>
-          <Form.Control
-            type="text"
-            id="course_name"
-            value={courseName}
-            onChange={(e) => setCourseName(e.target.value)}
-          />
-        </Form.Group>
+          <div>
+            <label htmlFor="course_name" className="label">
+              Course Name
+            </label>
+            <input
+              className="input input-bordered w-full max-w-[18%]"
+              type="text"
+              id="course_name"
+              value={courseName}
+              onChange={(e) => setCourseName(e.target.value)}
+            />
+          </div>
 
-        <Form.Group>
-          <Form.Label htmlFor="year">Year</Form.Label>
-          <Form.Control
-            type="number"
-            id="year"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-          />
-        </Form.Group>
+          <div>
+            <label htmlFor="year" className="label">
+              Year
+            </label>
+            <input
+              className="input input-bordered w-full max-w-[18%]"
+              type="number"
+              id="year"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+            />
+          </div>
 
-        <Form.Group>
-          <Form.Label htmlFor="semester">Semester</Form.Label>
-          <Form.Control
-            type="number"
-            id="semester"
-            value={semester}
-            onChange={(e) => setSemester(e.target.value)}
-          />
-        </Form.Group>
+          <div>
+            <label htmlFor="semester" className="label">
+              Semester
+            </label>
+            <input
+              className="input input-bordered w-full max-w-[18%]"
+              type="number"
+              id="semester"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+            />
+          </div>
 
-        <Form.Group>
-          <Form.Label htmlFor="programme">Programme</Form.Label>
-          <Form.Control
-            as="select"
-            id="programme"
-            value={selectedProgrammeName}
-            onChange={(e) => setSelectedProgrammeName(e.target.value)}
-          >
-            {programmes.map((programme) => (
-              <option key={programme.id} value={programme.programmeName}>
-                {programme.programmeName}
-              </option>
+          <div>
+            <label htmlFor="programme" className="label">
+              Programme
+            </label>
+            <select
+              className="select select-info w-full max-w-[18%]"
+              as="select"
+              id="programme"
+              value={selectedProgrammeName}
+              onChange={(e) => setSelectedProgrammeName(e.target.value)}
+            >
+              {programmes.map((programme) => (
+                <option key={programme.id} value={programme.programmeName}>
+                  {programme.programmeName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="department" className="label">
+              Department
+            </label>
+            <select
+              className="select select-info w-full max-w-[18%]"
+              as="select"
+              id="department"
+              value={selectedDeptName}
+              onChange={(e) => setSelectedDeptName(e.target.value)}
+            >
+              {departments.map((department) => (
+                <option key={department.id} value={department.deptName}>
+                  {department.deptName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="instructor" className="label">
+              Instructor
+            </label>
+            <select
+              className="select select-info w-full max-w-[18%]"
+              as="select"
+              id="instructor"
+              value={selectedInstructorName}
+              onChange={(e) => setSelectedInstructorName(e.target.value)}
+            >
+              {instructors.map((instructor) => (
+                <option key={instructor.id} value={instructor.firstName}>
+                  {instructor.firstName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button className="btn btn-primary" onClick={addCourse}>
+            Add Course
+          </button>
+        </form>
+
+        <h2>Existing Courses</h2>
+        {courses.map((course, index) => (
+          <div key={index}>
+            <h2>Existing Courses</h2>
+            {courses.map((course, index) => (
+              <div key={index}>
+                <h3>
+                  {course.courseName} ({course.courseCode})
+                </h3>
+                <p>Year: {course.year}</p>
+                <p>Semester: {course.semester}</p>
+                <p>Programme: {course.programmeName}</p>
+                <p>Department: {course.deptName}</p>
+                <p>Instructor: {course.instructorName}</p>
+              </div>
             ))}
-          </Form.Control>
-        </Form.Group>
 
-        <Form.Group>
-          <Form.Label htmlFor="department">Department</Form.Label>
-          <Form.Control
-            as="select"
-            id="department"
-            value={selectedDeptName}
-            onChange={(e) => setSelectedDeptName(e.target.value)}
-          >
-            {departments.map((department) => (
-              <option key={department.id} value={department.deptName}>
-                {department.deptName}
-              </option>
-            ))}
-          </Form.Control>
-        </Form.Group>
-
-        <Form.Group>
-          <Form.Label htmlFor="instructor">Instructor</Form.Label>
-          <Form.Control
-            as="select"
-            id="instructor"
-            value={selectedInstructorName}
-            onChange={(e) => setSelectedInstructorName(e.target.value)}
-          >
-            {instructors.map((instructor) => (
-              <option key={instructor.id} value={instructor.firstName}>
-                {instructor.firstName}
-              </option>
-            ))}
-          </Form.Control>
-        </Form.Group>
-
-        <Button onClick={addCourse}>Add Course</Button>
-      </Form>
-
-      <h2>Existing Courses</h2>
-      {courses.map((course, index) => (
-        <div key={index}>
-          <h2>Existing Courses</h2>
-          {courses.map((course, index) => (
-            <div key={index}>
-              <h3>
-                {course.courseName} ({course.courseCode})
-              </h3>
-              <p>Year: {course.year}</p>
-              <p>Semester: {course.semester}</p>
-              <p>Programme: {course.programmeName}</p>
-              <p>Department: {course.deptName}</p>
-              <p>Instructor: {course.instructorName}</p>
-            </div>
-          ))}
-
-          {/* ... */}
-          {/* Provide Edit/Delete functionality here */}
-        </div>
-      ))}
-    </Container>
+            {/* ... */}
+            {/* Provide Edit/Delete functionality here */}
+          </div>
+        ))}
+      </main>
+    </Layout>
   );
 };
 
