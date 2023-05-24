@@ -209,28 +209,73 @@ const Course = () => {
         </form>
 
         <h2>Existing Courses</h2>
-        {courses.map((course, index) => (
-          <div key={index}>
-            <h2>Existing Courses</h2>
-            {courses.map((course, index) => (
-              <div key={index}>
-                <h3>
-                  {course.courseName} ({course.courseCode})
-                </h3>
-                <p>Year: {course.year}</p>
-                <p>Semester: {course.semester}</p>
-                <p>Programme: {course.programmeName}</p>
-                <p>Department: {course.deptName}</p>
-                <p>Instructor: {course.instructorName}</p>
-              </div>
-            ))}
-
-            {/* ... */}
-            {/* Provide Edit/Delete functionality here */}
-          </div>
-        ))}
+        <CourseTable courses={courses} />
       </main>
     </Layout>
+  );
+};
+
+const CourseTable = ({ courses }) => {
+  return (
+    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table className="w-full text-sm text-left text-gray-500">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-50  ">
+          <tr>
+            <th scope="col" className="px-6 py-3">
+              Course Name
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Year
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Semester
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Programme Name
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Department Name
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Instructor Name
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Action
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {courses.map((course, index) => (
+            <tr
+              key={course.index}
+              className={`${
+                course.available ? "bg-white" : "bg-gray-50"
+              } border-b `}
+            >
+              <th
+                scope="row"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
+              >
+                {course.courseName} ({course.courseCode})
+              </th>
+              <td className="px-6 py-4">{course.year}</td>
+              <td className="px-6 py-4">{course.semester}</td>
+              <td className="px-6 py-4">{course.programmeName}</td>
+              <td className="px-6 py-4">{course.deptName}</td>
+              <td className="px-6 py-4">{course.instructorName}</td>
+              <td className="px-6 py-4">
+                <a
+                  href="#"
+                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                >
+                  Edit
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
