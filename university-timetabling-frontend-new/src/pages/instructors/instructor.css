@@ -1,0 +1,13 @@
+.instructor-page {
+  width: min(90%, 1300px);
+  margin: 0 auto;
+}
+/* .main-content--instructors {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr 2fr;
+} */
+
+.instructor-cards .stat:nth-child(3) {
+  outline: 2px solid salmon;
+}

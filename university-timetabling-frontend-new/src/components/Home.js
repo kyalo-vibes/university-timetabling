@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Button, Form, Container } from 'react-bootstrap';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Button, Form, Container } from "react-bootstrap";
+import Layout from "../pages/Layout";
 
 const Home = () => {
   const [semester, setSemester] = useState(1);
@@ -8,22 +9,24 @@ const Home = () => {
 
   // Function to generate timetable
   const generateTimetable = () => {
-    axios.post('http://localhost:8080/api/generate', { semester: semester })
-    .then(response => {
-      alert('Timetable generated');
-      fetchTimetables();
-    })
-    .catch(error => console.error(`Error: ${error}`));
-  }
+    axios
+      .post("http://localhost:8080/api/generate", { semester: semester })
+      .then((response) => {
+        alert("Timetable generated");
+        fetchTimetables();
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+  };
 
   // Function to fetch all timetables
   const fetchTimetables = () => {
-    axios.get('http://localhost:8080/api/timetables')
-    .then(response => {
-      setTimetables(response.data);
-    })
-    .catch(error => console.error(`Error: ${error}`));
-  }
+    axios
+      .get("http://localhost:8080/api/timetables")
+      .then((response) => {
+        setTimetables(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+  };
 
   // Fetch all timetables on initial render
   useEffect(() => {
@@ -31,34 +34,36 @@ const Home = () => {
   }, []);
 
   return (
-    <Container>
-      <h1>University Timetabling System</h1>
+    <Layout>
+      <main>
+        <h1>University Timetabling System</h1>
 
-      <Form>
-        <Form.Group>
-          <Form.Label>Semester</Form.Label>
-          <Form.Control 
-            type="number" 
-            value={semester} 
-            onChange={(e) => setSemester(e.target.value)} 
-            min={1} 
-            max={2} 
-          />
-        </Form.Group>
-        <Button onClick={generateTimetable}>Generate Timetable</Button>
-      </Form>
+        <form>
+          <div>
+            <label>Semester</label>
+            <select className="select select-accent w-full max-w-xs">
+              <option disabled selected>
+                Select the semester
+              </option>
+              <option>1</option>
+              <option>2</option>
+            </select>
+          </div>
+          <button className="btn btn-accent" onClick={generateTimetable}>
+            Generate Timetable
+          </button>
+        </form>
 
-      <h2>Timetables</h2>
-      {
-        timetables.map((timetable, index) => (
+        <h2>Timetables</h2>
+        {timetables.map((timetable, index) => (
           <div key={index}>
             <h3>Semester {timetable.semester}</h3>
             <pre>{JSON.stringify(timetable.data, null, 2)}</pre>
           </div>
-        ))
-      }
-    </Container>
+        ))}
+      </main>
+    </Layout>
   );
-}
+};
 
 export default Home;
