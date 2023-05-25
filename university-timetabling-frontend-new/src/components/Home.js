@@ -10,9 +10,9 @@ const Home = () => {
   // Function to generate timetable
   const generateTimetable = () => {
     axios
-      .post("http://localhost:8080/api/generate", { semester: semester })
+      .post("http://localhost:8080/api/schedule/generate", { semester: semester })
       .then((response) => {
-        alert("Timetable generated");
+        alert("Timetables generated");
         fetchTimetables();
       })
       .catch((error) => console.error(`Error: ${error}`));
@@ -21,7 +21,7 @@ const Home = () => {
   // Function to fetch all timetables
   const fetchTimetables = () => {
     axios
-      .get("http://localhost:8080/api/timetables")
+      .get("http://localhost:8080/api/schedule/timetables")
       .then((response) => {
         setTimetables(response.data);
       })

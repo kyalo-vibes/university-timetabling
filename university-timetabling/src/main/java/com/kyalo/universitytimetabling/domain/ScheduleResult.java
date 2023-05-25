@@ -1,17 +1,30 @@
 package com.kyalo.universitytimetabling.domain;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Entity
+@Table(name = "schedule_results")
 public class ScheduleResult {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @ElementCollection
     private List<String> courseCodes;
+
+    @ElementCollection
     private List<String> timeSlots;
+
+    @ElementCollection
     private List<String> instructorNames;
+
+    @ElementCollection
     private List<String> roomNames;
+
     private String message;
 
     public ScheduleResult() {
@@ -25,6 +38,13 @@ public class ScheduleResult {
         this.roomNames = schedules.stream().map(schedule -> schedule.getRoom().getRoomName()).collect(Collectors.toList());
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
     public List<String> getCourseCodes() {
         return courseCodes;
     }

@@ -17,36 +17,47 @@ public class ScheduleService {
     private final TimeSlotRepository timeSlotRepository;
     private final ScheduleRepository scheduleRepository;
     private final ProgramRepository programRepository;
+    private final ScheduleResultRepository scheduleResultRepository;
 
 
-    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository, ProgramRepository programRepository) {
+    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository, ProgramRepository programRepository, ScheduleResultRepository scheduleResultRepository) {
         this.courseRepository = courseRepository;
         this.roomRepository = roomRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.scheduleRepository = scheduleRepository;
         this.programRepository = programRepository;
+        this.scheduleResultRepository = scheduleResultRepository;
     }
 
     // Main scheduling method
     @Transactional
-    public Map<String, List<ScheduleResult>> generateSchedule(int semester) {
+    public void generateSchedule(int semester) {
         Map<String, List<ScheduleResult>> scheduleResults = new HashMap<>();
+        List<ScheduleResult> resultsToSave = new ArrayList<>();
 
         List<Program> programs = programRepository.findAll();
 
         for (Program program : programs) {
-            for (int year = 1; year <= 4; year++) { // Adjust this according to the number of years in your program
+            for (int year = 1; year <= 4; year++) {
                 ScheduleResult result = generateYearlySchedule(semester, year, program);
                 String key = "Year " + year + " " + program.getName();
                 if(!scheduleResults.containsKey(key)){
                     scheduleResults.put(key, new ArrayList<>());
                 }
                 scheduleResults.get(key).add(result);
+                resultsToSave.add(result);  // Add the result to the list that will be saved
             }
         }
 
-        return scheduleResults;
+        // Save the generated schedules to a database
+        scheduleResultRepository.saveAll(resultsToSave);
     }
+
+    public List<ScheduleResult> getAllScheduleResults() {
+        return scheduleResultRepository.findAll();
+    }
+
+
 
     // Add a new method to get schedules for a specific program and year
     public List<ScheduleResult> getSchedulesForProgramAndYear(String programName, int year) {

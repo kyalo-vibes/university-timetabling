@@ -24,16 +24,29 @@ public class ScheduleController {
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<Map<String, List<ScheduleResult>>> generateSchedule(@RequestParam int semester) {
+    public ResponseEntity<Void> generateSchedule(@RequestParam int semester) {
         try {
-            Map<String, List<ScheduleResult>> scheduleResults = scheduleService.generateSchedule(semester);
-
-            return ResponseEntity.ok(scheduleResults);
+            scheduleService.generateSchedule(semester);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
-            // We cannot return a map in the case of a bad request, so we will return an empty ResponseEntity
-            return ResponseEntity.badRequest().build();
+            // Log the error message
+            // e.g., logger.error("Failed to generate schedule: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/timetables")
+    public ResponseEntity<List<ScheduleResult>> getGeneratedSchedules() {
+        try {
+            List<ScheduleResult> scheduleResults = scheduleService.getAllScheduleResults();
+            return new ResponseEntity<>(scheduleResults, HttpStatus.OK);
+        } catch (Exception e) {
+            // Log the error message
+            // e.g., logger.error("Failed to get schedules: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     @GetMapping("/{programId}/{year}/{semester}")
     public Map<String, ScheduleResult> getSchedulesForProgramIdYearAndSemester(
