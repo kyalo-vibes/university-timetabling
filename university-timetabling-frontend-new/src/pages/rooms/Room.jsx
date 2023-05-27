@@ -73,35 +73,35 @@ const Room = () => {
               {/* Put this part before </body> tag */}
               <input type="checkbox" id="my-modal-5" className="modal-toggle" />
               <div className="modal">
-                <div className="modal-box w-11/12 max-w-5xl">
+                <div className="modal-box">
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       addRoom();
                     }}
                   >
-                    <div>
+                    <div className="flex justify-between items-center mt-4">
                       <label className="label">Room Name</label>
                       <input
-                        className="input input-bordered w-full max-w-[18%]"
+                        className="input input-bordered w-full max-w-[70%]"
                         type="text"
                         value={roomName}
                         onChange={(e) => setRoomName(e.target.value)}
                       />
                     </div>
-                    <div>
+                    <div className="flex justify-between items-center mt-4">
                       <label className="label">Room Capacity</label>
                       <input
-                        className="input input-bordered w-full max-w-[18%]"
+                        className="input input-bordered w-full max-w-[70%]"
                         type="number"
                         value={roomCapacity}
                         onChange={(e) => setRoomCapacity(e.target.value)}
                       />
                     </div>
-                    <div>
+                    <div className="flex justify-between items-center mt-4">
                       <label className="label">Room Type</label>
                       <select
-                        className="select select-info w-full max-w-xs"
+                        className="select select-info w-full max-w-[70%]"
                         as="select"
                         value={roomType}
                         onChange={(e) => setRoomType(e.target.value)}
@@ -110,21 +110,23 @@ const Room = () => {
                         <option value="SLT">SLT</option>
                       </select>
                     </div>
-                    <div className="w-[10%]">
+                    <div className="flex justify-between items-center mt-4">
                       <label className="cursor-pointer label">
-                        <span className="label-text">Available</span>
+                        <span>Available</span>
+                      </label>
+                      <div className="w-full flex items-center justify-start ml-16">
                         <input
                           type="checkbox"
                           checked={isAvailable}
                           onChange={(e) => setIsAvailable(e.target.checked)}
-                          className="toggle toggle-accent"
+                          className="toggle toggle-accent "
                         />
-                      </label>
+                      </div>
                     </div>
-                    <div>
+                    <div className="flex justify-between items-center mt-4">
                       <label>Department</label>
                       <select
-                        className="select select-info w-full max-w-xs"
+                        className="select select-info w-full max-w-[70%]"
                         as="select"
                         value={selectedDeptName}
                         onChange={(e) => setSelectedDeptName(e.target.value)}
