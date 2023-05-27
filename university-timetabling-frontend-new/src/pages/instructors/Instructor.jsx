@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./instructor.css";
 import axios from "axios";
-import { MdDelete } from "react-icons/md";
-import Header from "../../components/Header";
 import Layout from "../Layout";
 import { BiTimeFive } from "react-icons/bi";
 
