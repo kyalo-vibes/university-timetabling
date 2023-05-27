@@ -55,50 +55,66 @@ const Section = () => {
       <main>
         <h1 className="text-3xl font-bold">Sections</h1>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            addSection();
-          }}
-        >
-          <div>
-            <label className="label">Number of Classes</label>
-            <input
-              className="input input-bordered w-full max-w-[18%]"
-              type="number"
-              value={numberOfClasses}
-              onChange={(e) => setNumberOfClasses(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="label">Course</label>
-            <select
-              className="input input-bordered w-full max-w-[18%]"
-              as="select"
-              value={selectedCourseName}
-              onChange={(e) => setSelectedCourseName(e.target.value)}
-            >
-              {courses.map((course) => (
-                <option key={course.id} value={course.courseName}>
-                  {course.courseName}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button className="btn btn-primary" type="submit">
-            Add Section
-          </button>
-        </form>
+        <section className="w-4/5 mx-auto">
+          <div className="flex items-center justify-between">
+            <h2>Existing Sections</h2>
+            <div className="add-section">
+              <label htmlFor="my-modal-4" className="btn">
+                add sections
+              </label>
 
-        <h2>Existing Sections</h2>
-        {sections.map((section, index) => (
-          <div key={index}>
-            <h3>Section ID: {section.id}</h3>
-            <p>Number of Classes: {section.numberOfClasses}</p>
-            <p>Course: {section.courseName}</p>
-            {/* Provide Edit/Delete functionality here */}
+              {/* Put this part before </body> tag */}
+              <input type="checkbox" id="my-modal-4" className="modal-toggle" />
+              <label htmlFor="my-modal-4" className="modal cursor-pointer">
+                <label className="modal-box relative" htmlFor="">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      addSection();
+                    }}
+                  >
+                    <div className="flex justify-between items-center mt-4">
+                      <label className="label">Number of Classes</label>
+                      <input
+                        className="input input-bordered w-full max-w-[50%]"
+                        type="number"
+                        min={1}
+                        value={numberOfClasses}
+                        onChange={(e) => setNumberOfClasses(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center mt-4">
+                      <label className="label">Course</label>
+                      <select
+                        className="input input-bordered w-full max-w-[50%]"
+                        as="select"
+                        value={selectedCourseName}
+                        onChange={(e) => setSelectedCourseName(e.target.value)}
+                      >
+                        {courses.map((course) => (
+                          <option key={course.id} value={course.courseName}>
+                            {course.courseName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <button className="btn btn-primary" type="submit">
+                      Add Section
+                    </button>
+                  </form>
+                </label>
+              </label>
+            </div>
           </div>
-        ))}
+          {sections.map((section, index) => (
+            <div key={index}>
+              <h3>Section ID: {section.id}</h3>
+              <p>Number of Classes: {section.numberOfClasses}</p>
+              <p>Course: {section.courseName}</p>
+              {/* Provide Edit/Delete functionality here */}
+            </div>
+          ))}
+        </section>
       </main>
     </Layout>
   );
