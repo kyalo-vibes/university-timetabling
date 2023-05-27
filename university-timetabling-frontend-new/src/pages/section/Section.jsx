@@ -106,17 +106,48 @@ const Section = () => {
               </label>
             </div>
           </div>
-          {sections.map((section, index) => (
-            <div key={index}>
-              <h3>Section ID: {section.id}</h3>
-              <p>Number of Classes: {section.numberOfClasses}</p>
-              <p>Course: {section.courseName}</p>
-              {/* Provide Edit/Delete functionality here */}
-            </div>
-          ))}
+          <SectionTable sections={sections} />
         </section>
       </main>
     </Layout>
+  );
+};
+
+const SectionTable = ({ sections }) => {
+  return (
+    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table className="w-full text-sm text-left text-gray-500">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-50  ">
+          <tr>
+            <th scope="col" className="px-6 py-3">
+              Section ID
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Number of Classes
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Course
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {sections.map((section, index) => (
+            <tr key={section.index}>
+              <td className="px-6 py-4">{section.numberOfClasses}</td>
+              <td className="px-6 py-4">{section.courseName}</td>
+              <td className="px-6 py-4">
+                <a
+                  href="#"
+                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                >
+                  Edit
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
