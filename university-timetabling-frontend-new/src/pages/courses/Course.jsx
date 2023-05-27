@@ -75,7 +75,6 @@ const Course = () => {
     axios
       .post("http://localhost:8080/api/courses", newCourse)
       .then((response) => {
-        alert("Course added");
         fetchCourses();
       })
       .catch((error) => console.error(`Error: ${error}`));
@@ -92,6 +91,16 @@ const Course = () => {
     <Layout>
       <main>
         <h1 className="font-bold text-3xl">Courses</h1>
+
+        <div className="main-content">
+          <div className="courses-cards">
+            <div className="stat">
+              <div className="stat-title">Total Departments</div>
+              <div className="stat-value">{departments.length}</div>
+            </div>
+            <div className="stat"></div>
+          </div>
+        </div>
 
         <section id="courses-table" className="w-4/5">
           <div className="flex items-center justify-between">
