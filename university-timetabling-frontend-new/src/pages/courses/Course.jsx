@@ -93,123 +93,154 @@ const Course = () => {
       <main>
         <h1 className="font-bold text-3xl">Courses</h1>
 
-        <form>
-          <div>
-            <label htmlFor="course_code" className="label">
-              Course Code
-            </label>
-            <input
-              className="input input-bordered w-full max-w-[18%]"
-              type="text"
-              id="course_code"
-              value={courseCode}
-              onChange={(e) => setCourseCode(e.target.value)}
-            />
+        <section id="courses-table" className="w-4/5">
+          <div className="flex items-center justify-between">
+            <h2>Existing Courses</h2>
+            <div className="add-instructor ">
+              <label htmlFor="my-modal-4" className="btn">
+                add instructor
+              </label>
+
+              {/* Put this part before </body> tag */}
+              <input type="checkbox" id="my-modal-4" className="modal-toggle" />
+              <label htmlFor="my-modal-4" className="modal cursor-pointer">
+                <label className="modal-box relative" htmlFor="">
+                  <form>
+                    <div className="flex justify-between items-center mt-4">
+                      <label htmlFor="course_code" className="label ml-8">
+                        Course Code
+                      </label>
+                      <input
+                        className="input input-bordered w-full max-w-[60%]"
+                        type="text"
+                        id="course_code"
+                        value={courseCode}
+                        onChange={(e) => setCourseCode(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center mt-4">
+                      <label htmlFor="course_name" className="label ml-8">
+                        Course Name
+                      </label>
+                      <input
+                        className="input input-bordered w-full max-w-[60%]"
+                        type="text"
+                        id="course_name"
+                        value={courseName}
+                        onChange={(e) => setCourseName(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center mt-4">
+                      <label htmlFor="year" className="label ml-8">
+                        Year
+                      </label>
+                      <input
+                        className="input input-bordered w-full max-w-[60%]"
+                        type="number"
+                        id="year"
+                        value={year}
+                        onChange={(e) => setYear(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center mt-4">
+                      <label htmlFor="semester" className="label ml-8">
+                        Semester
+                      </label>
+                      <input
+                        className="input input-bordered w-full max-w-[60%]"
+                        type="number"
+                        id="semester"
+                        value={semester}
+                        onChange={(e) => setSemester(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center mt-4">
+                      <label htmlFor="programme" className="label ml-8">
+                        Programme
+                      </label>
+                      <select
+                        className="select select-info w-full max-w-[60%]"
+                        as="select"
+                        id="programme"
+                        value={selectedProgrammeName}
+                        onChange={(e) =>
+                          setSelectedProgrammeName(e.target.value)
+                        }
+                      >
+                        {programmes.map((programme) => (
+                          <option
+                            key={programme.id}
+                            value={programme.programmeName}
+                          >
+                            {programme.programmeName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-4">
+                      <label htmlFor="department" className="label ml-8">
+                        Department
+                      </label>
+                      <select
+                        className="select select-info w-full max-w-[60%]"
+                        as="select"
+                        id="department"
+                        value={selectedDeptName}
+                        onChange={(e) => setSelectedDeptName(e.target.value)}
+                      >
+                        {departments.map((department) => (
+                          <option
+                            key={department.id}
+                            value={department.deptName}
+                          >
+                            {department.deptName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-4">
+                      <label htmlFor="instructor" className="label ml-8">
+                        Instructor
+                      </label>
+                      <select
+                        className="select select-info w-full max-w-[60%]"
+                        as="select"
+                        id="instructor"
+                        value={selectedInstructorName}
+                        onChange={(e) =>
+                          setSelectedInstructorName(e.target.value)
+                        }
+                      >
+                        {instructors.map((instructor) => (
+                          <option
+                            key={instructor.id}
+                            value={instructor.firstName}
+                          >
+                            {instructor.firstName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex justify-end my-4">
+                      <button className="btn btn-primary" onClick={addCourse}>
+                        Add Course
+                      </button>
+                    </div>
+                  </form>
+                </label>
+              </label>
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="course_name" className="label">
-              Course Name
-            </label>
-            <input
-              className="input input-bordered w-full max-w-[18%]"
-              type="text"
-              id="course_name"
-              value={courseName}
-              onChange={(e) => setCourseName(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="year" className="label">
-              Year
-            </label>
-            <input
-              className="input input-bordered w-full max-w-[18%]"
-              type="number"
-              id="year"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="semester" className="label">
-              Semester
-            </label>
-            <input
-              className="input input-bordered w-full max-w-[18%]"
-              type="number"
-              id="semester"
-              value={semester}
-              onChange={(e) => setSemester(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="programme" className="label">
-              Programme
-            </label>
-            <select
-              className="select select-info w-full max-w-[18%]"
-              as="select"
-              id="programme"
-              value={selectedProgrammeName}
-              onChange={(e) => setSelectedProgrammeName(e.target.value)}
-            >
-              {programmes.map((programme) => (
-                <option key={programme.id} value={programme.programmeName}>
-                  {programme.programmeName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="department" className="label">
-              Department
-            </label>
-            <select
-              className="select select-info w-full max-w-[18%]"
-              as="select"
-              id="department"
-              value={selectedDeptName}
-              onChange={(e) => setSelectedDeptName(e.target.value)}
-            >
-              {departments.map((department) => (
-                <option key={department.id} value={department.deptName}>
-                  {department.deptName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="instructor" className="label">
-              Instructor
-            </label>
-            <select
-              className="select select-info w-full max-w-[18%]"
-              as="select"
-              id="instructor"
-              value={selectedInstructorName}
-              onChange={(e) => setSelectedInstructorName(e.target.value)}
-            >
-              {instructors.map((instructor) => (
-                <option key={instructor.id} value={instructor.firstName}>
-                  {instructor.firstName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button className="btn btn-primary" onClick={addCourse}>
-            Add Course
-          </button>
-        </form>
-
-        <h2>Existing Courses</h2>
-        <CourseTable courses={courses} />
+          <CourseTable courses={courses} />
+        </section>
       </main>
     </Layout>
   );
