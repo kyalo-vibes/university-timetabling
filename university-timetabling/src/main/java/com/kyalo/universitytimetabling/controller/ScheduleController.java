@@ -6,8 +6,10 @@ import com.kyalo.universitytimetabling.service.ProgramService;
 import com.kyalo.universitytimetabling.service.ScheduleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ public class ScheduleController {
         this.programService = programService;
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/generate")
     public ResponseEntity<Void> generateSchedule(@RequestParam int semester) {
         try {
@@ -35,6 +38,7 @@ public class ScheduleController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/timetables")
     public ResponseEntity<List<ScheduleResult>> getGeneratedSchedules() {
         try {
@@ -47,22 +51,22 @@ public class ScheduleController {
         }
     }
 
-
-    @GetMapping("/{programId}/{year}/{semester}")
-    public Map<String, ScheduleResult> getSchedulesForProgramIdYearAndSemester(
-            @PathVariable Long programId,
-            @PathVariable int year,
-            @PathVariable int semester) {
-        return scheduleService.getSchedulesForProgramIdYearAndSemester(programId, year, semester);
+    @PreAuthorize("hasAuthority('STUDENT')")
+    @GetMapping("/myTimetable")
+    public Map<String, ScheduleResult> getSchedulesForLoggedInUser(Principal principal) {
+        return scheduleService.getSchedulesForLoggedInUser(principal.getName());
     }
 
-    @GetMapping("/schedules/instructor/{instructorId}")
-    public ResponseEntity<Map<String, ScheduleResult>> getSchedulesForInstructorId(@PathVariable Long instructorId) {
-        Map<String, ScheduleResult> scheduleResults = scheduleService.getSchedulesForInstructorId(instructorId);
+
+    @PreAuthorize("hasAuthority('INSTRUCTOR')")
+    @GetMapping("/instructor")
+    public ResponseEntity<Map<String, ScheduleResult>> getSchedulesForInstructor(Principal principal) {
+        Map<String, ScheduleResult> scheduleResults = scheduleService.getSchedulesForInstructor(principal.getName());
         if(scheduleResults.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(scheduleResults, HttpStatus.OK);
     }
+
 
 }
