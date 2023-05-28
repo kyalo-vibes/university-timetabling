@@ -15,6 +15,27 @@ const Course = () => {
   const [selectedDeptName, setSelectedDeptName] = useState("");
   const [selectedInstructorName, setSelectedInstructorName] = useState("");
 
+  // pagination for the table
+  const [currentPage, setCurrentPage] = useState(1);
+  const [recordsPerPage] = useState(10);
+
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+
+  const currentCourses = courses.slice(indexOfFirstRecord, indexOfLastRecord);
+
+  const isFirstPage = currentPage === 1;
+
+  function handleNextPage() {
+    setCurrentPage((prev) => prev + 1);
+  }
+
+  function handlePreviousPage() {
+    if (!isFirstPage) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  }
+
   // Fetch all courses
   const fetchCourses = () => {
     axios
@@ -102,7 +123,7 @@ const Course = () => {
           </div>
         </div>
 
-        <section id="courses-table" className="w-4/5">
+        <section id="courses-table" className="w-7/8 mx-auto">
           <div className="flex items-center justify-between">
             <h2>Existing Courses</h2>
             <div className="add-instructor ">
@@ -248,7 +269,23 @@ const Course = () => {
             </div>
           </div>
 
-          <CourseTable courses={courses} />
+          <CourseTable courses={currentCourses} />
+
+          <div className="flex justify-between mt-4">
+            <button
+              className="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+              disabled={isFirstPage}
+              onClick={handlePreviousPage}
+            >
+              Previous
+            </button>
+            <button
+              className="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+              onClick={handleNextPage}
+            >
+              Next
+            </button>
+          </div>
         </section>
       </main>
     </Layout>
