@@ -11,6 +11,7 @@ import java.util.Set;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
+@DiscriminatorValue("INSTRUCTOR")
 @Table(name = "instructors")
 public class Instructor {
 
@@ -40,6 +41,9 @@ public class Instructor {
     )
     private Set<TimeSlot> preferences;
 
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
     public Instructor() {
     }
 
@@ -86,5 +90,13 @@ public class Instructor {
 
     public void setPreferences(Set<TimeSlot> preferences) {
         this.preferences = preferences;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

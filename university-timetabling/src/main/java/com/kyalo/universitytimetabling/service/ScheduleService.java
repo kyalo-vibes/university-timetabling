@@ -3,6 +3,7 @@ package com.kyalo.universitytimetabling.service;
 import com.kyalo.universitytimetabling.domain.*;
 import com.kyalo.universitytimetabling.repository.*;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,15 +19,17 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final ProgramRepository programRepository;
     private final ScheduleResultRepository scheduleResultRepository;
+    private final UserRepository userRepository;
 
 
-    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository, ProgramRepository programRepository, ScheduleResultRepository scheduleResultRepository) {
+    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository, ProgramRepository programRepository, ScheduleResultRepository scheduleResultRepository, UserRepository userRepository) {
         this.courseRepository = courseRepository;
         this.roomRepository = roomRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.scheduleRepository = scheduleRepository;
         this.programRepository = programRepository;
         this.scheduleResultRepository = scheduleResultRepository;
+        this.userRepository = userRepository;
     }
 
     // Main scheduling method
@@ -77,8 +80,16 @@ public class ScheduleService {
         return results;
     }
 
-    public Map<String, ScheduleResult> getSchedulesForProgramIdYearAndSemester(Long programId, int year, int semester) {
+    public Map<String, ScheduleResult> getSchedulesForLoggedInUser(String username) {
         Map<String, ScheduleResult> scheduleResults = new HashMap<>();
+
+        // Get the student for the current user
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Student student = user.getStudent();
+
+        Long programId = student.getProgram().getId();
+        int year = student.getYear();
 
         // Get all the schedules from the database
         List<Schedule> schedules = scheduleRepository.findAll();
@@ -89,10 +100,10 @@ public class ScheduleService {
         List<String> roomNames = new ArrayList<>();
         List<String> timeSlots = new ArrayList<>();
 
-        // Filter the schedules based on the programId, year, and semester
+        // Filter the schedules based on the programId and year
         for (Schedule schedule : schedules) {
             Course course = schedule.getCourse();
-            if (course.getProgram().getId().equals(programId) && (course.getYear() == year) && (course.getSemester() == semester)) {
+            if (course.getProgram().getId().equals(programId) && (course.getYear() == year)) {
                 // Add the values to the respective lists
                 courseCodes.add(schedule.getCourse().getCourseCode());
                 instructorNames.add(schedule.getCourse().getInstructor().getFirstName());
@@ -121,8 +132,14 @@ public class ScheduleService {
 
 
 
-    public Map<String, ScheduleResult> getSchedulesForInstructorId(Long instructorId) {
+    public Map<String, ScheduleResult> getSchedulesForInstructor(String username) {
         Map<String, ScheduleResult> scheduleResults = new HashMap<>();
+
+        // Get the instructor for the current user
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Instructor instructor = user.getInstructor();
+        Long instructorId = instructor.getId();
 
         // Get all the schedules from the database
         List<Schedule> schedules = scheduleRepository.findAll();
@@ -134,8 +151,8 @@ public class ScheduleService {
 
         // Filter the schedules based on the instructorId
         for (Schedule schedule : schedules) {
-            Instructor instructor = schedule.getCourse().getInstructor();
-            if (instructor.getId().equals(instructorId)) {
+            Instructor scheduleInstructor = schedule.getCourse().getInstructor();
+            if (scheduleInstructor.getId().equals(instructorId)) {
                 // Add the values to the respective lists
                 courseCodes.add(schedule.getCourse().getCourseCode());
                 roomNames.add(schedule.getRoom().getRoomName());
@@ -148,10 +165,10 @@ public class ScheduleService {
 
         // If there are any matching schedules, create a ScheduleResult and add it to the map
         if (!courseCodes.isEmpty()) {
-            String key = "Instructor " + schedules.get(0).getCourse().getInstructor().getFirstName(); // Use instructor name instead of ID
+            String key = "Instructor " + instructor.getFirstName(); // Use instructor name instead of ID
             ScheduleResult result = new ScheduleResult();
             result.setCourseCodes(courseCodes);
-            result.setInstructorNames(Arrays.asList(schedules.get(0).getCourse().getInstructor().getFirstName()));
+            result.setInstructorNames(Arrays.asList(instructor.getFirstName()));
             result.setRoomNames(roomNames);
             result.setTimeSlots(timeSlots);
             result.setMessage(key);
@@ -160,6 +177,7 @@ public class ScheduleService {
 
         return scheduleResults;
     }
+
 
 
 
