@@ -45,12 +45,14 @@ export default function Login() {
       //   console.log(JSON.stringify(res));
 
       const accessToken = res?.data?.token;
-      const roles = res?.data?.roles;
+      const decodedToken = window.atob(accessToken.split(".")[1]);
 
-      console.log(`Access Token: ${accessToken}`);
-      console.log(`roles: ${roles}`);
+      const role = JSON.parse(decodedToken).role;
 
-      setAuth({ user, pwd, roles, accessToken });
+      //   console.log(`Access Token: ${accessToken}`);
+      //   console.log(`roles: ${roles}`);
+
+      setAuth({ user, pwd, role, accessToken });
       setUser("");
       setPwd("");
       navigate(from, { replace: true });
