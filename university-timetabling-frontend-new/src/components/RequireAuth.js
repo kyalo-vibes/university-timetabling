@@ -10,7 +10,7 @@ const RequireAuth = ({ allowedRoles }) => {
   console.log(allowedRoles);
   console.log(auth.role);
 
-  console.log(allowedRoles === auth.role);
+  console.log(auth.accessToken);
 
   return allowedRoles?.includes(auth?.role) ? (
     <Outlet />
