@@ -15,6 +15,13 @@ import Layout from "./Layout/Layout";
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
 import LandingPage from "./pages/landing-page/LandingPage";
+import Unauthorized from "./pages/unauthorized/Unauthorized";
+
+const ROLES = {
+  student: "STUDENT",
+  instructor: "INSTRUCTOR",
+  admin: "ADMIN",
+};
 
 function App() {
   return (
@@ -24,11 +31,28 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="landingpage" element={<LandingPage />} />
+        <Route path="unauthorized" element={<Unauthorized />} />
 
         {/* protect these routes */}
-        <Route element={<RequireAuth />}>
+        <Route
+          element={
+            <RequireAuth
+              allowedRoles={[ROLES.student, ROLES.instructor, ROLES.admin]}
+            />
+          }
+        >
           <Route path="/" element={<Home />} />
+        </Route>
+
+        <Route
+          element={
+            <RequireAuth allowedRoles={[ROLES.instructor, ROLES.admin]} />
+          }
+        >
           <Route path="instructor" element={<Instructor />} />
+        </Route>
+
+        <Route element={<RequireAuth allowedRoles={[ROLES.admin]} />}>
           <Route path="room" element={<Room />} />
           <Route path="timeslot" element={<TimeSlot />} />
           <Route path="programme" element={<Programme />} />
@@ -44,9 +68,8 @@ function App() {
             path="instructor-timetable"
             element={<InstructorTimetable />}
           />
-
-          {/* end of protected routes */}
         </Route>
+        {/* end of protected routes */}
       </Route>
     </Routes>
   );
