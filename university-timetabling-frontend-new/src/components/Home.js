@@ -1,16 +1,33 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Form, Container } from "react-bootstrap";
-import Layout from "../pages/Layout";
+import Layout from "../Layout/DashboardLayout";
+import { useContext } from "react";
+import AuthContext from "../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 const Home = () => {
   const [semester, setSemester] = useState(1);
   const [timetables, setTimetables] = useState([]);
+  const { setAuth } = useContext(AuthContext);
+  const { auth } = useAuth();
+  const navigate = useNavigate();
 
   // Function to generate timetable
   const generateTimetable = () => {
     axios
-      .post("http://localhost:8080/api/schedule/generate", { semester: semester })
+      .post(
+        "http://localhost:8080/api/schedule/generate",
+        {
+          semester: semester,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      )
       .then((response) => {
         alert("Timetables generated");
         fetchTimetables();
@@ -21,7 +38,11 @@ const Home = () => {
   // Function to fetch all timetables
   const fetchTimetables = () => {
     axios
-      .get("http://localhost:8080/api/schedule/timetables")
+      .get("http://localhost:8080/api/schedule/timetables", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         setTimetables(response.data);
       })
@@ -33,10 +54,21 @@ const Home = () => {
     fetchTimetables();
   }, []);
 
+  // handle logout
+  async function logout() {
+    setAuth({});
+    localStorage.removeItem("user");
+    navigate("/login");
+  }
+
   return (
     <Layout>
       <main>
         <h1>University Timetabling System</h1>
+
+        <button onClick={logout} className="btn btn-warning">
+          Logout
+        </button>
 
         <form>
           <div>

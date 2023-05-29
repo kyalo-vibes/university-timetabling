@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Form, Container } from "react-bootstrap";
-import Layout from "../Layout";
+import Layout from "../../Layout/DashboardLayout";
 
 const Section = () => {
   const [sections, setSections] = useState([]);

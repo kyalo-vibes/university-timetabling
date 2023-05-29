@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Form, Container } from "react-bootstrap";
-import Layout from "../Layout";
+import DashboardLayout from "../../Layout/DashboardLayout";
 
 const Room = () => {
   const [rooms, setRooms] = useState([]);
@@ -56,7 +56,7 @@ const Room = () => {
   function handleAddRoom() {}
 
   return (
-    <Layout>
+    <DashboardLayout>
       <main>
         <h1 className="text-3xl font-bold">Rooms</h1>
 
@@ -162,7 +162,7 @@ const Room = () => {
           <RoomTable rooms={rooms} />
         </div>
       </main>
-    </Layout>
+    </DashboardLayout>
   );
 };
 
