@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Form, Container } from "react-bootstrap";
 import Layout from "../Layout";
+import EditModal from "./EditModal";
 const Course = () => {
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -14,6 +14,8 @@ const Course = () => {
   const [selectedProgrammeName, setSelectedProgrammeName] = useState("");
   const [selectedDeptName, setSelectedDeptName] = useState("");
   const [selectedInstructorName, setSelectedInstructorName] = useState("");
+  const [editingCourseId, setEditingCourseId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   // pagination for the table
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,6 +37,15 @@ const Course = () => {
       setCurrentPage((prev) => prev - 1);
     }
   }
+
+  function handleEdit(id) {
+    setEditingCourseId(id);
+    setShowModal(true);
+  }
+
+  const toggleModal = () => {
+    setShowModal(!showModal);
+  };
 
   // Fetch all courses
   const fetchCourses = () => {
@@ -101,6 +112,17 @@ const Course = () => {
       .catch((error) => console.error(`Error: ${error}`));
   };
 
+  const handleDelete = (id) => {
+    axios
+      .delete(`http://localhost:8080/api/courses/${id}`)
+      .then((response) => {
+        // Handle successful delete
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+    // redisplay table
+    fetchCourses();
+  };
+
   useEffect(() => {
     fetchCourses();
     fetchDepartments();
@@ -123,10 +145,10 @@ const Course = () => {
           </div>
         </div>
 
-        <section id="courses-table" className="w-7/8 mx-auto">
-          <div className="flex items-center justify-between">
-            <h2>Existing Courses</h2>
-            <div className="add-instructor ">
+        <section id="courses-table" className="w-4/5 mx-auto">
+          <div className="flex items-center justify-between py-4">
+            <h2 className="text-lg font-semibold mb-4">Existing Courses</h2>
+            <div className="add-course ">
               <label htmlFor="my-modal-4" className="btn">
                 add instructor
               </label>
@@ -269,7 +291,18 @@ const Course = () => {
             </div>
           </div>
 
-          <CourseTable courses={currentCourses} />
+          <CourseTable
+            courses={currentCourses}
+            handleDelete={handleDelete}
+            handleEdit={handleEdit}
+          />
+          {showModal && (
+            <EditModal
+              courseId={editingCourseId}
+              toggleModal={toggleModal}
+              fetchCourses={fetchCourses}
+            />
+          )}
 
           <div className="flex justify-between mt-4">
             <button
@@ -292,31 +325,31 @@ const Course = () => {
   );
 };
 
-const CourseTable = ({ courses }) => {
+const CourseTable = ({ courses, handleDelete, handleEdit }) => {
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50  ">
           <tr>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-2 py-3">
               Course Name
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-2 py-3">
               Year
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3">
               Semester
             </th>
             <th scope="col" className="px-6 py-3">
               Programme Name
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-8 py-3">
               Department Name
             </th>
             <th scope="col" className="px-6 py-3">
               Instructor Name
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-2 py-3">
               Action
             </th>
           </tr>
@@ -341,12 +374,49 @@ const CourseTable = ({ courses }) => {
               <td className="px-6 py-4">{course.deptName}</td>
               <td className="px-6 py-4">{course.instructorName}</td>
               <td className="px-6 py-4">
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Edit
-                </a>
+                {/* Provide Edit/Delete functionality here */}
+                <div className="flex items-center ">
+                  {/* The button to open modal */}
+                  <label htmlFor="my-modal" className="btn btn-warning">
+                    Delete
+                  </label>
+
+                  {/* Put this part before </body> tag */}
+                  <input
+                    type="checkbox"
+                    id="my-modal"
+                    className="modal-toggle"
+                  />
+                  <div className="modal">
+                    <div className="modal-box">
+                      <h3 className="font-bold text-lg">
+                        Confirm delete of the instructor?
+                      </h3>
+                      <p className="py-4">
+                        Do you want to delete the instructor, you can cancel.
+                      </p>
+                      <div className="modal-action">
+                        <label htmlFor="my-modal" className="btn btn-success">
+                          Cancel
+                        </label>
+                        <label
+                          htmlFor="my-modal"
+                          className="btn btn-secondary"
+                          onClick={() => handleDelete(course.id)}
+                        >
+                          Delete
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleEdit(course.id)}
+                    className="text-purple-600 hover:text-purple-400 font-semibold ml-6"
+                  >
+                    Edit
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
