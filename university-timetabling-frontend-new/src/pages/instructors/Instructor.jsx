@@ -3,6 +3,9 @@ import "./instructor.css";
 import axios from "axios";
 import DashboardLayout from "../../Layout/DashboardLayout";
 import { BiTimeFive } from "react-icons/bi";
+import AuthContext from "../../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
 
 const Instructor = () => {
   const [instructors, setInstructors] = useState([]);
@@ -11,6 +14,9 @@ const Instructor = () => {
   const [lastName, setLastName] = useState("");
   const [selectedDeptName, setSelectedDeptName] = useState("");
   const [allPreferences, setAllPreferences] = useState([]);
+
+  const { auth } = useAuth();
+  const navigate = useNavigate();
 
   // pagination for the table
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,7 +45,11 @@ const Instructor = () => {
   // Fetch all instructors
   const fetchInstructors = () => {
     axios
-      .get("http://localhost:8080/api/instructors")
+      .get("http://localhost:8080/api/instructors", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         setInstructors(response.data);
       })
@@ -48,7 +58,11 @@ const Instructor = () => {
 
   const fetchAllPreferences = () => {
     axios
-      .get("http://localhost:8080/api/instructors/preferences")
+      .get("http://localhost:8080/api/instructors/preferences", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         const preferencesData = response.data;
         setAllPreferences(preferencesData);
@@ -59,7 +73,11 @@ const Instructor = () => {
   // Fetch all departments
   const fetchDepartments = () => {
     axios
-      .get("http://localhost:8080/api/departments")
+      .get("http://localhost:8080/api/departments", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         setDepartments(response.data);
       })
@@ -75,7 +93,11 @@ const Instructor = () => {
     };
 
     axios
-      .post("http://localhost:8080/api/instructors", newInstructor)
+      .post("http://localhost:8080/api/instructors", newInstructor, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         alert("Instructor added");
         fetchInstructors();
@@ -92,7 +114,11 @@ const Instructor = () => {
 
   const handleDelete = (id) => {
     axios
-      .delete(`http://localhost:8080/api/instructors/${id}`)
+      .delete(`http://localhost:8080/api/instructors/${id}`, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         // Handle successful delete
       })

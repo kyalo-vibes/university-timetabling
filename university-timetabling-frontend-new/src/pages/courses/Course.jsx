@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DashboardLayout from "../../Layout/DashboardLayout";
 import EditModal from "./EditModal";
+import AuthContext from "../../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
+
 const Course = () => {
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -16,6 +20,9 @@ const Course = () => {
   const [selectedInstructorName, setSelectedInstructorName] = useState("");
   const [editingCourseId, setEditingCourseId] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  const { auth } = useAuth();
+  const navigate = useNavigate();
 
   // pagination for the table
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,7 +57,11 @@ const Course = () => {
   // Fetch all courses
   const fetchCourses = () => {
     axios
-      .get("http://localhost:8080/api/courses")
+      .get("http://localhost:8080/api/courses", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         console.log(response.data);
         setCourses(response.data);
@@ -61,7 +72,11 @@ const Course = () => {
   // Fetch all departments
   const fetchDepartments = () => {
     axios
-      .get("http://localhost:8080/api/departments")
+      .get("http://localhost:8080/api/departments", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         console.log(response.data);
 
@@ -73,7 +88,11 @@ const Course = () => {
   // Fetch all programmes
   const fetchProgrammes = () => {
     axios
-      .get("http://localhost:8080/api/programs")
+      .get("http://localhost:8080/api/programs", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         console.log(response.data);
 
@@ -85,7 +104,11 @@ const Course = () => {
   // Fetch all instructors
   const fetchInstructors = () => {
     axios
-      .get("http://localhost:8080/api/instructors")
+      .get("http://localhost:8080/api/instructors", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         setInstructors(response.data);
       })
@@ -105,7 +128,11 @@ const Course = () => {
     };
 
     axios
-      .post("http://localhost:8080/api/courses", newCourse)
+      .post("http://localhost:8080/api/courses", newCourse, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         fetchCourses();
       })
@@ -114,7 +141,11 @@ const Course = () => {
 
   const handleDelete = (id) => {
     axios
-      .delete(`http://localhost:8080/api/courses/${id}`)
+      .delete(`http://localhost:8080/api/courses/${id}`, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         // Handle successful delete
       })
