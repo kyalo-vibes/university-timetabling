@@ -2,10 +2,15 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Form, Container } from "react-bootstrap";
 import Layout from "../Layout/DashboardLayout";
+import { useContext } from "react";
+import AuthContext from "../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [semester, setSemester] = useState(1);
   const [timetables, setTimetables] = useState([]);
+  const { setAuth } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // Function to generate timetable
   const generateTimetable = () => {
@@ -35,10 +40,20 @@ const Home = () => {
     fetchTimetables();
   }, []);
 
+  // handle logout
+  async function logout() {
+    setAuth({});
+    navigate("/login");
+  }
+
   return (
     <Layout>
       <main>
         <h1>University Timetabling System</h1>
+
+        <button onClick={logout} className="btn btn-warning">
+          Logout
+        </button>
 
         <form>
           <div>
