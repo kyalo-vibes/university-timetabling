@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import RequireAuth from "./components/RequireAuth";
 import Home from "./components/Home";
 import Instructor from "./pages/instructors/Instructor";
 import Room from "./pages/rooms/Room";
@@ -25,22 +26,27 @@ function App() {
         <Route path="landingpage" element={<LandingPage />} />
 
         {/* protect these routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="instructor" element={<Instructor />} />
-        <Route path="room" element={<Room />} />
-        <Route path="timeslot" element={<TimeSlot />} />
-        <Route path="programme" element={<Programme />} />
-        <Route path="course" element={<Course />} />
-        <Route path="faculty" element={<Faculty />} />
-        <Route path="department" element={<Department />} />
-        <Route path="section" element={<Section />} />
-        <Route
-          path="instructor-preference"
-          element={<InstructorPreference />}
-        />
-        <Route path="instructor-timetable" element={<InstructorTimetable />} />
+        <Route element={<RequireAuth />}>
+          <Route path="/" element={<Home />} />
+          <Route path="instructor" element={<Instructor />} />
+          <Route path="room" element={<Room />} />
+          <Route path="timeslot" element={<TimeSlot />} />
+          <Route path="programme" element={<Programme />} />
+          <Route path="course" element={<Course />} />
+          <Route path="faculty" element={<Faculty />} />
+          <Route path="department" element={<Department />} />
+          <Route path="section" element={<Section />} />
+          <Route
+            path="instructor-preference"
+            element={<InstructorPreference />}
+          />
+          <Route
+            path="instructor-timetable"
+            element={<InstructorTimetable />}
+          />
 
-        {/* end of protected routes */}
+          {/* end of protected routes */}
+        </Route>
       </Route>
     </Routes>
   );
