@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Layout from "../Layout";
+import DashboardLayout from "../../Layout/DashboardLayout";
 import EditModal from "./EditModal";
 const Course = () => {
   const [courses, setCourses] = useState([]);
@@ -131,7 +131,7 @@ const Course = () => {
   }, []);
 
   return (
-    <Layout>
+    <DashboardLayout>
       <main>
         <h1 className="font-bold text-3xl">Courses</h1>
 
@@ -321,7 +321,7 @@ const Course = () => {
           </div>
         </section>
       </main>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

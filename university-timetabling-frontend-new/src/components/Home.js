@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Form, Container } from "react-bootstrap";
-import Layout from "../pages/Layout";
+import Layout from "../Layout/DashboardLayout";
 
 const Home = () => {
   const [semester, setSemester] = useState(1);
@@ -10,7 +10,9 @@ const Home = () => {
   // Function to generate timetable
   const generateTimetable = () => {
     axios
-      .post("http://localhost:8080/api/schedule/generate", { semester: semester })
+      .post("http://localhost:8080/api/schedule/generate", {
+        semester: semester,
+      })
       .then((response) => {
         alert("Timetables generated");
         fetchTimetables();

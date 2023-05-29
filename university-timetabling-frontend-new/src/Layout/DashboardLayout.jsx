@@ -1,10 +1,10 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { HiOutlineMenuAlt1 } from "react-icons/hi";
 import { MdSpaceDashboard } from "react-icons/md";
 import { SiGoogleclassroom } from "react-icons/si";
 
-export default function Layout({ children }) {
+export default function DashboardLayout({ children }) {
   return (
     <section>
       <button

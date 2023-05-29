@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./instructor.css";
 import axios from "axios";
-import Layout from "../Layout";
+import DashboardLayout from "../../Layout/DashboardLayout";
 import { BiTimeFive } from "react-icons/bi";
 
 const Instructor = () => {
@@ -101,7 +101,7 @@ const Instructor = () => {
   };
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="instructor-page">
         <main>
           <h1 className="text-3xl font-bold">Instructors</h1>
@@ -351,7 +351,7 @@ const Instructor = () => {
           </div>
         </main>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 
