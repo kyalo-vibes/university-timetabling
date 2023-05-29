@@ -5,19 +5,29 @@ import Layout from "../Layout/DashboardLayout";
 import { useContext } from "react";
 import AuthContext from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 const Home = () => {
   const [semester, setSemester] = useState(1);
   const [timetables, setTimetables] = useState([]);
   const { setAuth } = useContext(AuthContext);
+  const { auth } = useAuth();
   const navigate = useNavigate();
 
   // Function to generate timetable
   const generateTimetable = () => {
     axios
-      .post("http://localhost:8080/api/schedule/generate", {
-        semester: semester,
-      })
+      .post(
+        "http://localhost:8080/api/schedule/generate",
+        {
+          semester: semester,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      )
       .then((response) => {
         alert("Timetables generated");
         fetchTimetables();
@@ -28,7 +38,11 @@ const Home = () => {
   // Function to fetch all timetables
   const fetchTimetables = () => {
     axios
-      .get("http://localhost:8080/api/schedule/timetables")
+      .get("http://localhost:8080/api/schedule/timetables", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         setTimetables(response.data);
       })
@@ -43,6 +57,7 @@ const Home = () => {
   // handle logout
   async function logout() {
     setAuth({});
+    localStorage.removeItem("user");
     navigate("/login");
   }
 

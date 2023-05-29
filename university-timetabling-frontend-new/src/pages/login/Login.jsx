@@ -51,6 +51,7 @@ export default function Login() {
       //   console.log(`roles: ${roles}`);
 
       setAuth({ user, pwd, role, accessToken });
+      localStorage.setItem("user", JSON.stringify({ user, role, accessToken }));
       setUser("");
       setPwd("");
       navigate(from, { replace: true });
