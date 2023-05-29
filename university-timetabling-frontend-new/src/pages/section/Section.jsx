@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Form, Container } from "react-bootstrap";
 import Layout from "../../Layout/DashboardLayout";
+import AuthContext from "../../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
 
 const Section = () => {
   const [sections, setSections] = useState([]);
@@ -9,10 +12,17 @@ const Section = () => {
   const [numberOfClasses, setNumberOfClasses] = useState("");
   const [selectedCourseName, setSelectedCourseName] = useState("");
 
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+
   // Fetch all sections
   const fetchSections = () => {
     axios
-      .get("http://localhost:8080/api/sections")
+      .get("http://localhost:8080/api/sections", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         setSections(response.data);
       })
@@ -22,7 +32,11 @@ const Section = () => {
   // Fetch all courses
   const fetchCourses = () => {
     axios
-      .get("http://localhost:8080/api/courses")
+      .get("http://localhost:8080/api/courses", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         setCourses(response.data);
       })
@@ -37,7 +51,11 @@ const Section = () => {
     };
 
     axios
-      .post("http://localhost:8080/api/sections", newSection)
+      .post("http://localhost:8080/api/sections", newSection, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         alert("Section added");
         fetchSections();

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Form, Container } from "react-bootstrap";
 import DashboardLayout from "../../Layout/DashboardLayout";
+import AuthContext from "../../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
 
 const Room = () => {
   const [rooms, setRooms] = useState([]);
@@ -12,9 +15,16 @@ const Room = () => {
   const [isAvailable, setIsAvailable] = useState(true);
   const [selectedDeptName, setSelectedDeptName] = useState("");
 
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+
   const fetchRooms = () => {
     axios
-      .get("http://localhost:8080/api/rooms")
+      .get("http://localhost:8080/api/rooms", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         setRooms(response.data);
       })
@@ -23,7 +33,11 @@ const Room = () => {
 
   const fetchDepartments = () => {
     axios
-      .get("http://localhost:8080/api/departments")
+      .get("http://localhost:8080/api/departments", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         setDepartments(response.data);
       })
@@ -40,7 +54,11 @@ const Room = () => {
     };
 
     axios
-      .post("http://localhost:8080/api/rooms", newRoom)
+      .post("http://localhost:8080/api/rooms", newRoom, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then((response) => {
         alert("Room added");
         fetchRooms();
