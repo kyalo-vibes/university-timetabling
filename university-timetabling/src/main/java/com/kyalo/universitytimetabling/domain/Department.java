@@ -38,6 +38,9 @@ public class Department {
     @JsonBackReference("room-department")
     private List<Room> rooms = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "departments")
+    private List<Room> roomsByDept = new ArrayList<>();
+
     public Department() {
     }
 
@@ -93,5 +96,21 @@ public class Department {
 
     public void setRooms(List<Room> rooms) {
         this.rooms = rooms;
+    }
+
+    public List<Room> getRoomsByDept() {
+        return roomsByDept;
+    }
+
+    public void setRoomsByDept(List<Room> roomsByDept) {
+        this.rooms = rooms;
+    }
+
+    public void addRoom(Room room) {
+        this.roomsByDept.add(room);
+    }
+
+    public void removeRoom(Room room) {
+        this.roomsByDept.remove(room);
     }
 }

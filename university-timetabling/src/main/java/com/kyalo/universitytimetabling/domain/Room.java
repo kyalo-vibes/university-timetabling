@@ -37,6 +37,12 @@ public class Room {
     @ManyToMany
     private List<TimeSlot> occupiedTimeSlots = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(name = "room_department",
+            joinColumns = @JoinColumn(name = "room_id"),
+            inverseJoinColumns = @JoinColumn(name = "dept_id"))
+    private List<Department> departments = new ArrayList<>();
+
     public Room() {
     }
 
@@ -105,5 +111,21 @@ public class Room {
 
     public Department getDepartment() {
         return department;
+    }
+
+    public List<Department> getDepartments() {
+        return departments;
+    }
+
+    public void setDepartments(List<Department> departments) {
+        this.departments = departments;
+    }
+
+    public void addDepartment(Department department) {
+        this.departments.add(department);
+    }
+
+    public void removeDepartment(Department department) {
+        this.departments.remove(department);
     }
 }

@@ -39,6 +39,13 @@ public class Schedule {
         this.timeSlot = timeSlot;
     }
 
+    public Schedule(Schedule existingSchedule) {
+        this.course = existingSchedule.getCourse();
+        this.room = existingSchedule.getRoom();
+        this.timeSlot = existingSchedule.getTimeSlot();
+        this.section = existingSchedule.getSection();
+    }
+
     // Getters and setters
 
     public Long getId() {
