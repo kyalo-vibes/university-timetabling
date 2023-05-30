@@ -60,4 +60,11 @@ public class CourseController {
         List<CourseDTO> courses = courseService.getAllCourses();
         return new ResponseEntity<>(courses, HttpStatus.OK);
     }
+
+    @GetMapping("/no-section")
+    public ResponseEntity<List<CourseDTO>> getCoursesWithoutSection() {
+        List<CourseDTO> courses = courseService.getCoursesWithoutSection();
+        return new ResponseEntity<>(courses, HttpStatus.OK);
+    }
+
 }
