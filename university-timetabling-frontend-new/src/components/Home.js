@@ -10,6 +10,7 @@ import useAuth from "../hooks/useAuth";
 const Home = () => {
   const [semester, setSemester] = useState(1);
   const [timetables, setTimetables] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
   const { setAuth } = useContext(AuthContext);
   const { auth } = useAuth();
   const navigate = useNavigate();
@@ -18,10 +19,7 @@ const Home = () => {
   const generateTimetable = () => {
     axios
       .post(
-        "http://localhost:8080/api/schedule/generate",
-        {
-          semester: semester,
-        },
+        `http://localhost:8080/api/schedule/generate?semester=${semester}`,
         {
           headers: {
             Authorization: `Bearer ${auth.accessToken}`,
@@ -86,6 +84,10 @@ const Home = () => {
     setTimetables(filteredData);
   };
 
+  const handleReset = () => {
+    setTimetables(originalData);
+  };
+
   // Function to fetch all timetables
   const fetchTimetables = () => {
     axios
@@ -96,6 +98,7 @@ const Home = () => {
       })
       .then((response) => {
         setTimetables(response.data);
+        setOriginalData(response.data);
       })
       .catch((error) => console.error(`Error: ${error}`));
   };
@@ -140,16 +143,21 @@ const Home = () => {
         </form>
 
         <h2>Timetables</h2>
-        <Filter
-          columns={[
-            "ID",
-            "Course Codes",
-            "Time Slots",
-            "Instructor Names",
-            "Room Names",
-          ]}
-          onFilter={handleFilter}
-        />
+        <div className="flex flex-col items-start">
+          <Filter
+            columns={[
+              "ID",
+              "Course Codes",
+              "Time Slots",
+              "Instructor Names",
+              "Room Names",
+            ]}
+            onFilter={handleFilter}
+          />
+          <button className="btn btn-accent" onClick={handleReset}>
+            Reset Filters
+          </button>
+        </div>
         <Table data={timetables} />
       </main>
     </Layout>
@@ -204,11 +212,12 @@ const Filter = ({ columns, onFilter }) => {
   };
 
   return (
-    <form onSubmit={handleFilterSubmit}>
+    <form onSubmit={handleFilterSubmit} className="flex items-center py-6">
       {columns.map((column) => (
         <div key={column}>
           <label htmlFor={column}>{column}</label>
           <input
+            className="input w-1/2 input-bordered input-primary"
             type="text"
             id={column}
             name={column}
@@ -216,7 +225,9 @@ const Filter = ({ columns, onFilter }) => {
           />
         </div>
       ))}
-      <button type="submit">Filter</button>
+      <button className="btn" type="submit">
+        Filter
+      </button>
     </form>
   );
 };
