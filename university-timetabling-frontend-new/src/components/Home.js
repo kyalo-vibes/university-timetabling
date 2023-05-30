@@ -21,22 +21,46 @@ const Home = () => {
   // Function to generate timetable
   const generateTimetable = (event) => {
     event.preventDefault();
-    setLoading(true);
+    setLoading(true); 
     axios
-      .post(
-        `http://localhost:8080/api/schedule/generate?semester=${semester}`,
-        {
-          headers: {
-            Authorization: `Bearer ${auth.accessToken}`,
-          },
-        }
-      )
-      .then((response) => {
-        alert("Timetables generated");
-        fetchTimetables();
-      })
-      .catch((error) => console.error(`Error: ${error}`));
-  };
+    .post(
+      `http://localhost:8080/api/schedule/generate?semester=${semester}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      }
+    )
+    .then((response) => {
+      let intervalId = setInterval(() => {
+        axios
+          .get(
+            `http://localhost:8080/api/schedule/status?semester=${semester}`,
+            {
+              headers: {
+                Authorization: `Bearer ${auth.accessToken}`,
+              },
+            }
+          )
+          .then((response) => {
+            if (response.data === 'COMPLETED') {
+              clearInterval(intervalId);
+              setLoading(false); 
+              setIsCompleted(true); 
+              // Use setTimeout to create a small delay before the alert
+              window.setTimeout(() => alert("Timetables generated"), 50);
+              fetchTimetables(); 
+            }
+          })
+          .catch((error) => console.error(`Error: ${error}`));
+      }, 5000);
+    })
+    .catch((error) => {
+      console.error(`Error: ${error}`);
+      setLoading(false);
+    });
+};
 
   const handleFilter = (filters) => {
     // filter your data here based on the filters
