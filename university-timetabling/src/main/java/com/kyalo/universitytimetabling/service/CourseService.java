@@ -149,4 +149,13 @@ public class CourseService {
     public void deleteSection(Long id) {
         sectionRepository.deleteById(id);
     }
+
+    public List<CourseDTO> getCoursesWithoutSection() {
+        return courseRepository.findAll()
+                .stream()
+                .filter(course -> sectionRepository.findByCourseId(course.getId()).isEmpty())
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
 }

@@ -86,10 +86,15 @@ const Instructor = () => {
 
   // Add a new instructor
   const addInstructor = () => {
+    let newDeptName = selectedDeptName;
+    if (selectedDeptName === "") {
+      newDeptName = departments.length > 0 ? departments[0].deptName : "";
+    }
+  
     const newInstructor = {
       firstName: firstName,
       lastName: lastName,
-      deptName: selectedDeptName,
+      deptName: newDeptName,
     };
 
     axios
@@ -99,9 +104,9 @@ const Instructor = () => {
         },
       })
       .then((response) => {
-        alert("Instructor added");
         fetchInstructors();
         fetchAllPreferences();
+        alert("Instructor added");
       })
       .catch((error) => console.error(`Error: ${error}`));
   };
@@ -225,22 +230,18 @@ const Instructor = () => {
                                 Department
                               </label>
                               <select
-                                required="true"
-                                className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-                                value={selectedDeptName}
-                                onChange={(e) =>
-                                  setSelectedDeptName(e.target.value)
-                                }
-                              >
-                                {departments.map((department) => (
-                                  <option
-                                    key={department.id}
-                                    value={department.deptName}
-                                  >
-                                    {department.deptName}
-                                  </option>
-                                ))}
-                              </select>
+  required="true"
+  className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+  value={selectedDeptName === "" ? departments[0]?.deptName : selectedDeptName}
+  onChange={(e) => setSelectedDeptName(e.target.value)}
+>
+  {departments.map((department) => (
+    <option key={department.id} value={department.deptName}>
+      {department.deptName}
+    </option>
+  ))}
+</select>
+
                             </div>
                             <div className="md:flex md: items-center mt-6">
                               <button

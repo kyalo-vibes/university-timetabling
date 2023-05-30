@@ -3,16 +3,19 @@ package com.kyalo.universitytimetabling.service;
 import com.kyalo.universitytimetabling.domain.*;
 import com.kyalo.universitytimetabling.repository.*;
 import jakarta.transaction.Transactional;
+import org.springframework.javapoet.ClassName;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 
 @Service
 public class ScheduleService {
 
-    // Assuming that these repositories have been implemented
     private final CourseRepository courseRepository;
     private final RoomRepository roomRepository;
     private final TimeSlotRepository timeSlotRepository;
@@ -20,9 +23,15 @@ public class ScheduleService {
     private final ProgramRepository programRepository;
     private final ScheduleResultRepository scheduleResultRepository;
     private final UserRepository userRepository;
+    private final ProgramEnrollmentRepository programEnrollmentRepository;
+    private final ScheduleStatusRepository scheduleStatusRepository;
+    private static final Logger LOGGER = Logger.getLogger(ClassName.class.getName()); // Replace ClassName with the actual class name
+
+    private Map<String, List<Schedule>> commonCourseSchedules = new HashMap<>();
 
 
-    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository, ProgramRepository programRepository, ScheduleResultRepository scheduleResultRepository, UserRepository userRepository) {
+
+    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository, ProgramRepository programRepository, ScheduleResultRepository scheduleResultRepository, UserRepository userRepository, ProgramEnrollmentRepository programEnrollmentRepository, ScheduleStatusRepository scheduleStatusRepository) {
         this.courseRepository = courseRepository;
         this.roomRepository = roomRepository;
         this.timeSlotRepository = timeSlotRepository;
@@ -30,11 +39,18 @@ public class ScheduleService {
         this.programRepository = programRepository;
         this.scheduleResultRepository = scheduleResultRepository;
         this.userRepository = userRepository;
+        this.programEnrollmentRepository = programEnrollmentRepository;
+        this.scheduleStatusRepository = scheduleStatusRepository;
     }
 
     // Main scheduling method
     @Transactional
+    @Async
     public void generateSchedule(int semester) {
+        ScheduleStatus scheduleStatus = new ScheduleStatus();
+        scheduleStatus.setSemester(semester);
+        scheduleStatus.setStatus("IN_PROGRESS");
+        scheduleStatusRepository.save(scheduleStatus);
         Map<String, List<ScheduleResult>> scheduleResults = new HashMap<>();
         List<ScheduleResult> resultsToSave = new ArrayList<>();
 
@@ -54,6 +70,10 @@ public class ScheduleService {
 
         // Save the generated schedules to a database
         scheduleResultRepository.saveAll(resultsToSave);
+
+        // Update the status as COMPLETED
+        scheduleStatus.setStatus("COMPLETED");
+        scheduleStatusRepository.save(scheduleStatus);
     }
 
     public List<ScheduleResult> getAllScheduleResults() {
@@ -266,19 +286,100 @@ public class ScheduleService {
 
         // Check if the section is not null before proceeding
         if (section == null) {
-            // handle this situation appropriately, e.g., log an error message, throw an exception, or skip this course
+            LOGGER.severe("Section is null for course: " + course.getId()); // Replace getId() with your method to get unique identifier for course
             return false;
         }
 
+        // Check if the course is a common course
+        if (course.isCommonCourse()) {
+            List<Schedule> existingCommonCourseSchedules = commonCourseSchedules.get(course.getCommonId());
+
+            // If this common course has been scheduled before, fetch the schedules
+            if (existingCommonCourseSchedules != null && existingCommonCourseSchedules.size() >= section.getNumberOfClasses()) {
+                for (Schedule existingSchedule : existingCommonCourseSchedules) {
+                    Schedule newSchedule = new Schedule(existingSchedule); // assuming there's a copy constructor
+                    newSchedule.setCourse(course); // update the course id to the current one
+                    // save the schedule in the repository
+                    scheduleRepository.save(newSchedule);
+                    // add this schedule to the schedules list
+                    schedules.add(newSchedule);
+                }
+                LOGGER.info("Common course " + course.getId() + " is fully scheduled.");
+                return true;
+            } else {
+                // The common course is being scheduled for the first time
+                int requiredClasses = section.getNumberOfClasses();
+                int classesScheduled = 0;
+
+                // Populate the available rooms and time slots
+                List<Room> availableRooms = getValidRoomsForCourse(course, schedules);
+                List<TimeSlot> availableTimeSlots = getValidTimeSlotsForCourse(course, schedules);
+
+                // Iterate through available rooms and timeslots
+                for (Room availRoom : availableRooms) {
+                    for (TimeSlot availTimeSlot : availableTimeSlots) {
+                        // Check if the room and time slot are valid for the course
+                        // Also check if the room's name contains the course's year
+                        if (availRoom.isAvailable(availTimeSlot) && !instructorBusyAt(course.getInstructor(), availTimeSlot, schedules) &&
+                                !studentBusyAt(course, availTimeSlot, schedules) && !timeSlotBusyAt(course, availTimeSlot, schedules) && roomBelongsToDept(course, availRoom) &&
+                                roomMatchesCourseSpec(course, availRoom) && availRoom.getRoomName().contains(Integer.toString(course.getYear()))) {
+
+                            Schedule schedule = new Schedule();
+                            schedule.setCourse(course);
+                            schedule.setRoom(availRoom);
+                            schedule.setTimeSlot(availTimeSlot);
+                            schedule.setSection(section);
+
+                            // Make room unavailable
+                            availRoom.occupyTimeSlot(availTimeSlot);
+
+                            // Add the schedule to the schedule repository
+                            scheduleRepository.save(schedule);
+
+                            // Add the created schedule to the schedules list
+                            schedules.add(schedule);
+
+                            // Store this schedule for this common course
+                            commonCourseSchedules.computeIfAbsent(course.getCommonId(), k -> new ArrayList<>()).add(schedule);
+
+                            // Increase scheduled class count
+                            classesScheduled++;
+
+                            // If the course has been scheduled for the number of classes required, return true
+                            if (classesScheduled >= requiredClasses) {
+                                return true;
+                            }
+                        }
+                        // If we've scheduled all required classes, break the outer loop as well
+                        if (classesScheduled >= requiredClasses) {
+                            break;
+                        }
+                    }
+
+                    // If the common course is not fully scheduled after the loop, it means it failed to be scheduled and should return false.
+                    return false;
+                }
+            }
+        }
+
+
         // Check if the section is fully scheduled, continue to the next iteration
         if (isSectionFullyScheduled(section, schedules)) {
+            LOGGER.info("Section " + section.getId() + " is fully scheduled."); // Replace getId() with your method to get unique identifier for section
+            return false;
+        }
+
+        ProgramEnrollment programEnrollment = programEnrollmentRepository.findByProgramAndYear(course.getProgram(), course.getYear());
+        if (programEnrollment != null && room.getCapacity() < programEnrollment.getEnrolledNumber()) {
+            LOGGER.warning("Room " + room.getId() + " capacity is less than the enrolled number."); // Replace getId() with your method to get unique identifier for room
             return false;
         }
 
         // Check if the room and time slot are valid for the course
         // Also check if the room's name contains the course's year
         if (room.isAvailable(timeSlot) && !instructorBusyAt(course.getInstructor(), timeSlot, schedules) &&
-                !studentBusyAt(course, timeSlot, schedules) && roomBelongsToDept(course, room) &&
+                !studentBusyAt(course, timeSlot, schedules) && !timeSlotBusyAt(course, timeSlot, schedules) && roomBelongsToDept(course, room) &&
+                roomMatchesCourseSpec(course, room) &&
                 room.getRoomName().contains(Integer.toString(course.getYear()))) {
 
             Schedule schedule = new Schedule();
@@ -295,6 +396,14 @@ public class ScheduleService {
 
             // Add the created schedule to the schedules list
             schedules.add(schedule);
+
+            // Store this schedule for this common course
+            if (course.isCommonCourse()) {
+                if (!commonCourseSchedules.containsKey(course.getCommonId())) {
+                    commonCourseSchedules.put(course.getCommonId(), new ArrayList<>());
+                }
+                commonCourseSchedules.get(course.getCommonId()).add(schedule);
+            }
 
             // Check for any constraint violations
             if (evaluateSchedule(schedules) >= 0) {
@@ -377,16 +486,16 @@ public class ScheduleService {
     }
 
     private List<Room> getValidRoomsForCourse(Course course, List<Schedule> schedules) {
-        // Get all the rooms from the database.
         List<Room> allRooms = roomRepository.findAll();
+        List<Room> validRooms = new ArrayList<>();
 
-        // Create a list to store valid rooms.
-        List<Room> validRooms = new ArrayList<>(allRooms);
+        for (Room room : allRooms) {
+            if (roomMatchesCourseSpec(course, room)) {
+                validRooms.add(room);
+            }
+        }
 
-        // Iterate over the schedules.
         for (Schedule schedule : schedules) {
-            // If the course of the current schedule is the same as the given course,
-            // remove the room of the current schedule from the valid rooms.
             if (schedule.getCourse().equals(course)) {
                 validRooms.remove(schedule.getRoom());
             }
@@ -394,6 +503,7 @@ public class ScheduleService {
 
         return validRooms;
     }
+
 
 
 
@@ -441,14 +551,30 @@ public class ScheduleService {
     }
 
 
+
     @Transactional
     private boolean backtrackScheduleHelper(List<Course> courses, List<Room> rooms, List<TimeSlot> timeSlots, int courseIndex, List<Schedule> schedules) {
         // If we've assigned all courses, the schedule is complete
         if (courseIndex == courses.size()) {
+            LOGGER.info("All courses have been assigned. Schedule is complete.");
             return true;
         }
 
         Course course = courses.get(courseIndex);
+
+        // Check if the course is a common course
+        if (course.isCommonCourse()) {
+            // If the common course has been scheduled before, use the existing schedules
+            if (commonCourseSchedules.containsKey(course.getCommonId())) {
+                List<Schedule> existingSchedules = commonCourseSchedules.get(course.getCommonId());
+
+                // Add these schedules to the current schedules list
+                schedules.addAll(existingSchedules);
+
+                // Continue with the next course;
+                return backtrackScheduleHelper(courses, rooms, timeSlots, courseIndex + 1, schedules);
+            }
+        }
 
         // Iterate over all rooms and time slots
         for (Room room : rooms) {
@@ -456,14 +582,16 @@ public class ScheduleService {
                 // Create a new Schedule for this assignment
                 Schedule schedule = new Schedule();
 
-                // Check if the room and time slot are valid for the course
+                // If the room and time slot are valid for the course
                 if (room.isAvailable(timeSlot) && !instructorBusyAt(course.getInstructor(), timeSlot, schedules) &&
-                        !studentBusyAt(course, timeSlot, schedules) && roomBelongsToDept(course, room)) {
+                        !studentBusyAt(course, timeSlot, schedules) && !timeSlotBusyAt(course, timeSlot, schedules) &&
+                        roomBelongsToDept(course, room)) {
 
                     // Assign the course to the room and time slot
                     schedule.setCourse(course);
                     schedule.setRoom(room);
                     schedule.setTimeSlot(timeSlot);
+                    schedule.setSection(course.getSection()); // Set the section for the schedule
 
                     // Make room unavailable
                     room.occupyTimeSlot(timeSlot);
@@ -471,6 +599,14 @@ public class ScheduleService {
                     // Add the schedule to the schedule repository and the current schedules list
                     scheduleRepository.save(schedule);
                     schedules.add(schedule);
+                    LOGGER.info("Schedule saved and added to schedules. Room made unavailable.");
+
+                    // If the course is a common course, add it to the commonCourseSchedules map
+                    if (course.isCommonCourse()) {
+                        List<Schedule> existingSchedules = commonCourseSchedules.getOrDefault(course.getCommonId(), new ArrayList<>());
+                        existingSchedules.add(schedule);
+                        commonCourseSchedules.put(course.getCommonId(), existingSchedules);
+                    }
 
                     // Recursively assign the rest of the courses
                     if (backtrackScheduleHelper(courses, rooms, timeSlots, courseIndex + 1, schedules)) {
@@ -480,18 +616,36 @@ public class ScheduleService {
                     // If assigning the course to the room and time slot didn't lead to a solution, remove it
                     scheduleRepository.delete(schedule);
                     schedules.remove(schedule);
+                    LOGGER.warning("Assignment didn't lead to a solution. Schedule removed and room made available.");
 
                     // Make room available again
                     room.freeTimeSlot(timeSlot);
+
+                    // If the course is a common course and the assignment didn't lead to a solution, remove it from the commonCourseSchedules map
+                    if (course.isCommonCourse()) {
+                        commonCourseSchedules.get(course.getCommonId()).remove(schedule);
+                    }
                 }
             }
         }
 
         // If no room and time slot could be found for the course, backtrack by returning false
         // This will trigger the backtracking process in the previous recursion level
+        LOGGER.warning("No room and time slot found for the course. Backtracking...");
         return false;
     }
 
+
+    private boolean timeSlotBusyAt(Course currentCourse, TimeSlot timeSlot, List<Schedule> schedules) {
+        // Check if the time slot is already assigned to another course in the same program
+        for (Schedule schedule : schedules) {
+            if (schedule.getTimeSlot().equals(timeSlot) &&
+                    schedule.getCourse().getProgram().equals(currentCourse.getProgram())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
     private boolean instructorBusyAt(Instructor instructor, TimeSlot timeSlot, List<Schedule> schedules) {
@@ -505,19 +659,19 @@ public class ScheduleService {
     }
 
     private boolean studentBusyAt(Course course, TimeSlot timeSlot, List<Schedule> schedules) {
-        // Check if the students are already taking a course at the given time slot
         for(Schedule schedule : schedules) {
-            if(schedule.getCourse().getProgram().equals(course.getProgram()) && schedule.getTimeSlot().equals(timeSlot)) {
+            if(schedule.getCourse().getCourseCode().equals(course.getCourseCode()) && schedule.getTimeSlot().equals(timeSlot)) {
                 return true;
             }
         }
         return false;
     }
 
+
     private boolean roomBelongsToDept(Course course, Room room) {
         // Check if the room belongs to the department of the course
-        // This implementation assumes that a method getRooms() exists in the Department class
-        return course.getDepartment().getRooms().contains(room);
+        // This implementation assumes that a method getDepartments() exists in the Room class
+        return room.getDepartments().contains(course.getDepartment());
     }
 
     private boolean isSectionFullyScheduled(Section section, List<Schedule> schedules) {
@@ -534,5 +688,56 @@ public class ScheduleService {
         return classesScheduled >= section.getNumberOfClasses();
     }
 
+    private boolean roomMatchesCourseSpec(Course course, Room room) {
+        // If the course has a room_spec, check if it matches the room's type.
+        // If the course doesn't have a room_spec, any room is fine.
+        return course.getRoomSpec() == null || course.getRoomSpec().equals(room.getRoomType());
+    }
+
+    private int getScheduledClassesForCourse(Course course, List<Schedule> schedules) {
+        int count = 0;
+        for (Schedule schedule : schedules) {
+            if (schedule.getCourse().getCommonId() != null &&
+                    schedule.getCourse().getCommonId().equals(course.getCommonId())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private List<Schedule> getExistingSchedulesForCommonCourse(Course course, List<Schedule> schedules) {
+        List<Schedule> matchingSchedules = new ArrayList<>();
+
+        for (Schedule schedule : schedules) {
+            // Check if the courses share the same common ID regardless of the program
+            if (schedule.getCourse().getCommonId() != null &&
+                    schedule.getCourse().getCommonId().equals(course.getCommonId())) {
+                matchingSchedules.add(schedule);
+            }
+        }
+
+        return matchingSchedules;
+    }
+
+
+    private boolean canUseExistingSchedule(Course course, Room room, TimeSlot timeSlot, List<Schedule> schedules) {
+        return room.isAvailable(timeSlot) &&
+                !instructorBusyAt(course.getInstructor(), timeSlot, schedules) &&
+                !studentBusyAt(course, timeSlot, schedules) &&
+                !timeSlotBusyAt(course, timeSlot, schedules) &&
+                roomBelongsToDept(course, room);
+    }
+
+    private List<Schedule> getExistingSchedulesForCommonCourseByProgram(Course course, List<Schedule> schedules) {
+        List<Schedule> existingSchedules = new ArrayList<>();
+
+        for (Schedule schedule : schedules) {
+            if (schedule.getCourse().getCommonId().equals(course.getCommonId()) && schedule.getCourse().getProgram().equals(course.getProgram())) {
+                existingSchedules.add(schedule);
+            }
+        }
+
+        return existingSchedules;
+    }
 
 }

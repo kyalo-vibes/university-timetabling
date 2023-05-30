@@ -6,17 +6,23 @@ import { useContext } from "react";
 import AuthContext from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import "../styles/styles.css";
+
 
 const Home = () => {
   const [semester, setSemester] = useState(1);
   const [timetables, setTimetables] = useState([]);
   const [originalData, setOriginalData] = useState([]);
+  const [loading, setLoading] = useState(false); // New state variable for loading
+  const [isCompleted, setIsCompleted] = useState(false); // New state variable for completion
   const { setAuth } = useContext(AuthContext);
   const { auth } = useAuth();
   const navigate = useNavigate();
 
   // Function to generate timetable
-  const generateTimetable = () => {
+  const generateTimetable = (event) => {
+    event.preventDefault();
+    setLoading(true); 
     axios
       .post(
         `http://localhost:8080/api/schedule/generate?semester=${semester}`,
@@ -105,23 +111,40 @@ const Home = () => {
 
   // Fetch all timetables on initial render
   useEffect(() => {
+    if (!loading && isCompleted) {
+      const timer = setTimeout(() => setIsCompleted(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, isCompleted]);
+
+  useEffect(() => {
     fetchTimetables();
   }, []);
 
   console.log(timetables);
 
   // handle logout
-  async function logout() {
-    setAuth({});
-    localStorage.removeItem("user");
-    navigate("/login");
-  }
+async function logout() {
+  setAuth({});
+  localStorage.removeItem("user");  // Clear 'user' in localStorage
+  navigate("/login");
+}
 
   return (
     <Layout>
       <main>
-        <h1>University Timetabling System</h1>
+      {loading || isCompleted ? (
+      <div className="loading-overlay">
+        <div className={`spinner ${isCompleted ? 'success' : 'spinning'}`}>
+          {isCompleted && <div className="success-message">✔︎</div>}
+        </div>
+        <p className="text">
+          {isCompleted ? 'Successfully generated timetables!' : 'Generating timetables...'}
+        </p>
+      </div>
+    ) : null}
 
+        <h1>University Timetabling System</h1>
         <button onClick={logout} className="btn btn-warning">
           Logout
         </button>
@@ -137,9 +160,9 @@ const Home = () => {
               <option>2</option>
             </select>
           </div>
-          <button className="btn btn-accent" onClick={generateTimetable}>
-            Generate Timetable
-          </button>
+          <button className="btn btn-accent" onClick={(event) => generateTimetable(event)}>
+  Generate Timetable
+</button>
         </form>
 
         <h2>Timetables</h2>

@@ -32,7 +32,7 @@ const Section = () => {
   // Fetch all courses
   const fetchCourses = () => {
     axios
-      .get("http://localhost:8080/api/courses", {
+      .get("http://localhost:8080/api/courses/no-section", {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
         },

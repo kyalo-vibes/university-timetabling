@@ -29,6 +29,11 @@ public class Course {
     @Column(name = "semester")
     private int semester;
 
+    @Column(name = "room_spec")
+    private String roomSpec;
+
+    private String commonId; // New field
+
     @ManyToOne
     @JoinColumn(name = "programme_id")
     @JsonBackReference("program-course")
@@ -125,5 +130,25 @@ public class Course {
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+    public String getRoomSpec() {
+        return roomSpec;
+    }
+
+    public void setRoomSpec(String roomSpec) {
+        this.roomSpec = roomSpec;
+    }
+
+    public boolean isCommonCourse() {
+        return this.courseCode.startsWith("CCS");
+    }
+
+    public String getCommonId() {
+        return commonId;
+    }
+
+    public void setCommonId(String commonId) {
+        this.commonId = commonId;
     }
 }

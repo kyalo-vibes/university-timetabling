@@ -81,6 +81,9 @@ const Course = () => {
         console.log(response.data);
 
         setDepartments(response.data);
+        if (response.data.length > 0) {
+          setSelectedDeptName(response.data[0].deptName);
+        }
       })
       .catch((error) => console.error(`Error: ${error}`));
   };
@@ -97,6 +100,9 @@ const Course = () => {
         console.log(response.data);
 
         setProgrammes(response.data);
+        if (response.data.length > 0) {
+          setSelectedProgrammeName(response.data[0].programmeName);
+        }
       })
       .catch((error) => console.error(`Error: ${error}`));
   };
@@ -111,12 +117,17 @@ const Course = () => {
       })
       .then((response) => {
         setInstructors(response.data);
+        if (response.data.length > 0) {
+          setSelectedInstructorName(response.data[0].firstName);
+        }
       })
       .catch((error) => console.error(`Error: ${error}`));
   };
 
   // Add a new course
-  const addCourse = () => {
+  const addCourse = (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
+
     const newCourse = {
       courseCode: courseCode,
       courseName: courseName,
@@ -134,6 +145,7 @@ const Course = () => {
         },
       })
       .then((response) => {
+        alert("Course added");
         fetchCourses();
       })
       .catch((error) => console.error(`Error: ${error}`));
@@ -181,7 +193,7 @@ const Course = () => {
             <h2 className="text-lg font-semibold mb-4">Existing Courses</h2>
             <div className="add-course ">
               <label htmlFor="my-modal-4" className="btn">
-                add instructor
+                add course
               </label>
 
               {/* Put this part before </body> tag */}
