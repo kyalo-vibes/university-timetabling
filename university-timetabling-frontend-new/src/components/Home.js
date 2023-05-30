@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import "../styles/styles.css";
 
-
 const Home = () => {
   const [semester, setSemester] = useState(1);
   const [timetables, setTimetables] = useState([]);
@@ -22,7 +21,7 @@ const Home = () => {
   // Function to generate timetable
   const generateTimetable = (event) => {
     event.preventDefault();
-    setLoading(true); 
+    setLoading(true);
     axios
       .post(
         `http://localhost:8080/api/schedule/generate?semester=${semester}`,
@@ -124,32 +123,36 @@ const Home = () => {
   console.log(timetables);
 
   // handle logout
-async function logout() {
-  setAuth({});
-  localStorage.removeItem("user");  // Clear 'user' in localStorage
-  navigate("/login");
-}
+  async function logout() {
+    setAuth({});
+    localStorage.removeItem("user"); // Clear 'user' in localStorage
+    navigate("/login");
+  }
 
   return (
     <Layout>
       <main>
-      {loading || isCompleted ? (
-      <div className="loading-overlay">
-        <div className={`spinner ${isCompleted ? 'success' : 'spinning'}`}>
-          {isCompleted && <div className="success-message">✔︎</div>}
-        </div>
-        <p className="text">
-          {isCompleted ? 'Successfully generated timetables!' : 'Generating timetables...'}
-        </p>
-      </div>
-    ) : null}
+        {loading || isCompleted ? (
+          <div className="loading-overlay">
+            <div className={`spinner ${isCompleted ? "success" : "spinning"}`}>
+              {isCompleted && <div className="success-message">✔︎</div>}
+            </div>
+            <p className="text">
+              {isCompleted
+                ? "Successfully generated timetables!"
+                : "Generating timetables..."}
+            </p>
+          </div>
+        ) : null}
 
-        <h1>University Timetabling System</h1>
-        <button onClick={logout} className="btn btn-warning">
-          Logout
-        </button>
+        <section className="flex justify-between">
+          <h1>University Timetabling System</h1>
+          <button onClick={logout} className="btn btn-warning">
+            Logout
+          </button>
+        </section>
 
-        <form>
+        <form className="flex justify-start items-center py-4">
           <div>
             <label>Semester</label>
             <select className="select select-accent w-full max-w-xs">
@@ -160,9 +163,12 @@ async function logout() {
               <option>2</option>
             </select>
           </div>
-          <button className="btn btn-accent" onClick={(event) => generateTimetable(event)}>
-  Generate Timetable
-</button>
+          <button
+            className="btn btn-accent"
+            onClick={(event) => generateTimetable(event)}
+          >
+            Generate Timetable
+          </button>
         </form>
 
         <h2>Timetables</h2>
