@@ -4,6 +4,7 @@ import com.kyalo.universitytimetabling.domain.*;
 import com.kyalo.universitytimetabling.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.javapoet.ClassName;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +24,14 @@ public class ScheduleService {
     private final ScheduleResultRepository scheduleResultRepository;
     private final UserRepository userRepository;
     private final ProgramEnrollmentRepository programEnrollmentRepository;
+    private final ScheduleStatusRepository scheduleStatusRepository;
     private static final Logger LOGGER = Logger.getLogger(ClassName.class.getName()); // Replace ClassName with the actual class name
 
     private Map<String, List<Schedule>> commonCourseSchedules = new HashMap<>();
 
 
 
-    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository, ProgramRepository programRepository, ScheduleResultRepository scheduleResultRepository, UserRepository userRepository, ProgramEnrollmentRepository programEnrollmentRepository) {
+    public ScheduleService(CourseRepository courseRepository, RoomRepository roomRepository, TimeSlotRepository timeSlotRepository, ScheduleRepository scheduleRepository, ProgramRepository programRepository, ScheduleResultRepository scheduleResultRepository, UserRepository userRepository, ProgramEnrollmentRepository programEnrollmentRepository, ScheduleStatusRepository scheduleStatusRepository) {
         this.courseRepository = courseRepository;
         this.roomRepository = roomRepository;
         this.timeSlotRepository = timeSlotRepository;
@@ -38,11 +40,17 @@ public class ScheduleService {
         this.scheduleResultRepository = scheduleResultRepository;
         this.userRepository = userRepository;
         this.programEnrollmentRepository = programEnrollmentRepository;
+        this.scheduleStatusRepository = scheduleStatusRepository;
     }
 
     // Main scheduling method
     @Transactional
+    @Async
     public void generateSchedule(int semester) {
+        ScheduleStatus scheduleStatus = new ScheduleStatus();
+        scheduleStatus.setSemester(semester);
+        scheduleStatus.setStatus("IN_PROGRESS");
+        scheduleStatusRepository.save(scheduleStatus);
         Map<String, List<ScheduleResult>> scheduleResults = new HashMap<>();
         List<ScheduleResult> resultsToSave = new ArrayList<>();
 
@@ -62,6 +70,10 @@ public class ScheduleService {
 
         // Save the generated schedules to a database
         scheduleResultRepository.saveAll(resultsToSave);
+
+        // Update the status as COMPLETED
+        scheduleStatus.setStatus("COMPLETED");
+        scheduleStatusRepository.save(scheduleStatus);
     }
 
     public List<ScheduleResult> getAllScheduleResults() {

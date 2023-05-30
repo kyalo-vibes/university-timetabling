@@ -28,7 +28,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const res = await axios.post(
         LOGIN_URL,
@@ -38,20 +38,17 @@ export default function Login() {
           withCredentials: true,
         }
       );
-
-      //   console.log(JSON.stringify(res?.data));
-      //   console.log(JSON.stringify(res));
-
+  
       const accessToken = res?.data?.token;
       const decodedToken = window.atob(accessToken.split(".")[1]);
-
+  
       const role = JSON.parse(decodedToken).role;
-
-      //   console.log(`Access Token: ${accessToken}`);
-      //   console.log(`roles: ${roles}`);
-
-      setAuth({ user, pwd, role, accessToken });
-      localStorage.setItem("user", JSON.stringify({ user, role, accessToken }));
+  
+      const authUser = { user, pwd, role, accessToken }; // define user object
+  
+      setAuth(authUser); // update state
+      localStorage.setItem("user", JSON.stringify(authUser)); // update localStorage
+  
       setUser("");
       setPwd("");
       navigate(from, { replace: true });
