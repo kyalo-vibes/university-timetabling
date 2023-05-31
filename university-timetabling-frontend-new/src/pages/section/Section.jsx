@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Form, Container } from "react-bootstrap";
 import Layout from "../../Layout/DashboardLayout";
 import AuthContext from "../../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +31,7 @@ const Section = () => {
   // Fetch all courses
   const fetchCourses = () => {
     axios
-      .get("http://localhost:8080/api/courses/no-section", {
+      .get("http://localhost:8080/api/courses/", {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
         },
@@ -132,16 +131,65 @@ const Section = () => {
 };
 
 const SectionTable = ({ sections }) => {
+  const [courses, setCourses] = useState([]);
+  const [numberOfClasses, setNumberOfClasses] = useState("");
+  const [selectedCourseName, setSelectedCourseName] = useState("");
+
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+
+  // Fetch all courses
+  const fetchCourses = () => {
+    axios
+      .get("http://localhost:8080/api/courses/", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setCourses(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+  };
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const handleSectionUpdate = (id) => {
+    console.log(id);
+    const updatedCourse = {
+      id: id,
+      numberOfClasses: numberOfClasses,
+      courseName: selectedCourseName,
+    };
+
+    console.log(sections.id);
+
+    axios
+      .put(`http://localhost:8080/api/sections/${id}`, updatedCourse, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        // fetchCourses();
+        console.log(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+
+    // toggleModal();
+    // fetchCourses();
+  };
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50  ">
           <tr>
             <th scope="col" className="px-6 py-3">
-              Section ID
+              Number of Classes
             </th>
             <th scope="col" className="px-6 py-3">
-              Number of Classes
+              Course Name
             </th>
             <th scope="col" className="px-6 py-3">
               Course
@@ -154,12 +202,71 @@ const SectionTable = ({ sections }) => {
               <td className="px-6 py-4">{section.numberOfClasses}</td>
               <td className="px-6 py-4">{section.courseName}</td>
               <td className="px-6 py-4">
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Edit
-                </a>
+                <div>
+                  <label
+                    htmlFor="my-modal-2"
+                    className="text-purple-600 hover:text-purple-400 font-semibold ml-6"
+                  >
+                    Edit
+                  </label>
+                  {/* Put this part before </body> tag */}
+                  <input
+                    type="checkbox"
+                    id="my-modal-2"
+                    className="modal-toggle"
+                  />
+                  <div className="modal">
+                    <div className="modal-box">
+                      <h3 className="font-bold text-lg">Update the section</h3>
+                      <form>
+                        <div className="flex justify-between items-center mt-4">
+                          <label className="label">Number of Classes</label>
+                          <input
+                            className="input input-bordered w-full max-w-[50%]"
+                            type="number"
+                            min={1}
+                            value={numberOfClasses}
+                            onChange={(e) => setNumberOfClasses(e.target.value)}
+                          />
+                        </div>
+                        <div className="flex justify-between items-center mt-4">
+                          <label className="label">Course</label>
+                          <select
+                            className="input input-bordered w-full max-w-[50%]"
+                            as="select"
+                            value={selectedCourseName}
+                            onChange={(e) =>
+                              setSelectedCourseName(e.target.value)
+                            }
+                          >
+                            {sections.map((item) => (
+                              <option key={item.id} value={item.courseName}>
+                                {item.courseName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="modal-action">
+                          <label
+                            htmlFor="my-modal-2"
+                            className="btn btn-success"
+                          >
+                            Cancel
+                          </label>
+                          <label
+                            onClick={() =>
+                              handleSectionUpdate(section.section_id)
+                            }
+                            htmlFor="my-modal-2"
+                            className="btn btn-primary"
+                          >
+                            Update
+                          </label>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
               </td>
             </tr>
           ))}
