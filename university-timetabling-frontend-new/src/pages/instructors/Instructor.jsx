@@ -15,6 +15,8 @@ const Instructor = () => {
   const [selectedDeptName, setSelectedDeptName] = useState("");
   const [allPreferences, setAllPreferences] = useState([]);
   const [timeslots, setTimeslots] = useState([]);
+  const [selectedTimeslot, setSelectedTimeslot] = useState("");
+  const [selectedInstructor, setSelectedInstructor] = useState("");
 
   const { auth } = useAuth();
   const navigate = useNavigate();
@@ -147,6 +149,43 @@ const Instructor = () => {
     fetchInstructors();
   };
 
+  const handleAddPreference = () => {
+    const instructorId = selectedInstructor;
+    const preferenceId = JSON.parse(selectedTimeslot).id;
+
+    const postData = {
+      timeslot: JSON.parse(selectedTimeslot),
+      instructorName: selectedInstructor,
+      // other form data
+    };
+
+    console.log(postData);
+
+    fetch(
+      `http://localhost:8080/api/instructors/${instructorId}/preferences/${preferenceId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify(postData),
+      }
+    )
+      .then((response) => {
+        if (response.ok) {
+          // Request was successful
+          // Handle success response
+          fetchAllPreferences();
+        } else {
+          // Request failed
+          // Handle error response
+        }
+      })
+      .catch((error) => {
+        // Handle network error
+      });
+  };
+
   return (
     <DashboardLayout>
       <div className="instructor-page">
@@ -192,110 +231,84 @@ const Instructor = () => {
                     Add preference
                   </label>
                   {/* Put this part before </body> tag */}
-                  <input
-                    type="checkbox"
-                    id="my-modal-2"
-                    className="modal-toggle"
-                  />
-                  <div className="modal">
-                    <div className="modal-box">
-                      <h3 className="font-bold text-lg">
-                        Add instructor preference
-                      </h3>
-                      <form>
-                        <div className="flex justify-between items-center mt-4">
-                          <label htmlFor="programme" className="label ml-8">
-                            TimeSlot Day
-                          </label>
-                          <select
-                            className="select select-info w-full max-w-[60%]"
-                            as="select"
-                            id="programme"
-                          >
-                            {timeslots.map((timeslot) => (
-                              <option key={timeslot.id} value={timeslot.day}>
-                                {timeslot.day}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="flex justify-between items-center mt-4">
-                          <label htmlFor="programme" className="label ml-8">
-                            TimeSlot StartTime
-                          </label>
-                          <select
-                            className="select select-info w-full max-w-[60%]"
-                            as="select"
-                            id="programme"
-                          >
-                            {timeslots.map((timeslot) => (
-                              <option
-                                key={timeslot.id}
-                                value={timeslot.startTime}
-                              >
-                                {timeslot.startTime}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="flex justify-between items-center mt-4">
-                          <label htmlFor="programme" className="label ml-8">
-                            TimeSlot EndTime
-                          </label>
-                          <select
-                            className="select select-info w-full max-w-[60%]"
-                            as="select"
-                            id="programme"
-                          >
-                            {timeslots.map((timeslot) => (
-                              <option
-                                key={timeslot.id}
-                                value={timeslot.endTime}
-                              >
-                                {timeslot.endTime}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                  <section className="w-1/3">
+                    <input
+                      type="checkbox"
+                      id="my-modal-2"
+                      className="modal-toggle"
+                    />
+                    <div className="modal">
+                      <div className="modal-box">
+                        <h3 className="font-bold text-lg">
+                          Add instructor preference
+                        </h3>
+                        <form>
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="timeslot" className="label ml-8">
+                              Time Slot
+                            </label>
+                            <select
+                              className="select select-info max-w-[65%]"
+                              as="select"
+                              id="programme"
+                              onChange={(e) =>
+                                setSelectedTimeslot(e.target.value)
+                              }
+                            >
+                              {timeslots.map((timeslot) => (
+                                <option
+                                  key={timeslot.id}
+                                  value={JSON.stringify(timeslot)}
+                                >
+                                  {`${timeslot.day} (${timeslot.startTime} - ${timeslot.endTime})`}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
 
-                        <div className="flex justify-between items-center mt-4">
-                          <label htmlFor="department" className="label ml-8">
-                            Instructor
-                          </label>
-                          <select
-                            className="select select-info w-full max-w-[60%]"
-                            as="select"
-                            id="department"
-                            value=""
-                          >
-                            {instructors.map((instructor) => (
-                              <option
-                                key={instructor.id}
-                                value={instructor.firstName}
-                              >
-                                {instructor.firstName} {instructor.lastName}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="department" className="label ml-8">
+                              Instructor
+                            </label>
+                            <select
+                              className="select select-info w-full max-w-[60%]"
+                              as="select"
+                              id="department"
+                              value={selectedInstructor}
+                              onChange={(e) =>
+                                setSelectedInstructor(e.target.value)
+                              }
+                            >
+                              {instructors.map((instructor) => (
+                                <option
+                                  key={instructor.id}
+                                  value={instructor.id}
+                                >
+                                  {instructor.firstName} {instructor.lastName}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
 
-                        <div className="modal-action">
-                          <label
-                            htmlFor="my-modal-2"
-                            className="btn btn-success"
-                          >
-                            Cancel
-                          </label>
-                          <label
-                            htmlFor="my-modal-2"
-                            className="btn btn-primary"
-                          >
-                            Add
-                          </label>
-                        </div>
-                      </form>
+                          <div className="modal-action">
+                            <label
+                              htmlFor="my-modal-2"
+                              className="btn btn-success"
+                            >
+                              Cancel
+                            </label>
+                            <label
+                              onClick={handleAddPreference}
+                              htmlFor="my-modal-2"
+                              className="btn btn-primary"
+                            >
+                              Add
+                            </label>
+                          </div>
+                        </form>
+                      </div>
                     </div>
-                  </div>
+                  </section>
                 </div>
               </div>
             </section>
