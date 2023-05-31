@@ -219,34 +219,39 @@ const Home = () => {
 
 const Table = ({ data }) => {
   return (
-    <table className="table-auto">
-      <thead>
-        <tr>
-          <th className="px-4 py-2">ID</th>
-          <th className="px-4 py-2">Course Codes</th>
-          <th className="px-4 py-2">Time Slots</th>
-          <th className="px-4 py-2">Instructor Names</th>
-          <th className="px-4 py-2">Room Names</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.map((item) =>
-          item.courseCodes.map((courseCode, index) => (
-            <tr key={`${item.id}-${index}`}>
-              <td className="border px-4 py-2">{item.id}</td>
-              <td className="border px-4 py-2">{courseCode}</td>
-              <td className="border px-4 py-2">{item.timeSlots[index]}</td>
-              <td className="border px-4 py-2">
-                {item.instructorNames[index]}
-              </td>
-              <td className="border px-4 py-2">{item.roomNames[index]}</td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
+    <>
+      {data.map((item) => (
+        <div key={item.id} className="timetable">
+          <h3 className="timetable-header">Timetable ID: {item.id}</h3>
+          <p className="message">{item.message}</p>
+          <table className="table-auto">
+            <thead>
+              <tr>
+                <th className="px-4 py-2">Course Codes</th>
+                <th className="px-4 py-2">Time Slots</th>
+                <th className="px-4 py-2">Instructor Names</th>
+                <th className="px-4 py-2">Room Names</th>
+              </tr>
+            </thead>
+            <tbody>
+              {item.courseCodes.map((courseCode, index) => (
+                <tr key={`${item.id}-${index}`}>
+                  <td className="border px-4 py-2">{courseCode}</td>
+                  <td className="border px-4 py-2">{item.timeSlots[index]}</td>
+                  <td className="border px-4 py-2">
+                    {item.instructorNames[index]}
+                  </td>
+                  <td className="border px-4 py-2">{item.roomNames[index]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </>
   );
 };
+
 
 const Filter = ({ columns, onFilter }) => {
   const [filters, setFilters] = useState({});

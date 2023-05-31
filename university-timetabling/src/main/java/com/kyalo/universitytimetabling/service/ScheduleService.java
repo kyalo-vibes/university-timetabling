@@ -247,7 +247,9 @@ public class ScheduleService {
         if(!anyCoursesScheduled) {
             return new ScheduleResult(schedules, "No courses were scheduled.");
         } else {
-            return new ScheduleResult(schedules, "Schedule created successfully");
+            // Changing the success message to include program name and year
+            String successMessage = "Schedule for " + program.getName() + ", year " + year;
+            return new ScheduleResult(schedules, successMessage);
         }
     }
 
