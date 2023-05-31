@@ -17,7 +17,28 @@ const Home = () => {
   const { setAuth } = useContext(AuthContext);
   const { auth } = useAuth();
   const navigate = useNavigate();
+  const [timeslots, setTimeslots] = useState([]);
+  
 
+const fetchTimeslots = () => {
+    axios
+      .get("http://localhost:8080/api/timeslots", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setTimeslots(response.data.map(timeslot => `${timeslot.day}: ${timeslot.startTime} - ${timeslot.endTime}`));
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+};
+
+useEffect(() => {
+  fetchTimeslots();
+}, []);
+
+
+  
   // Function to generate timetable
   const generateTimetable = (event) => {
     event.preventDefault();
@@ -132,6 +153,9 @@ const Home = () => {
       .catch((error) => console.error(`Error: ${error}`));
   };
 
+
+  
+
   // Fetch all timetables on initial render
   useEffect(() => {
     if (!loading && isCompleted) {
@@ -211,61 +235,84 @@ const Home = () => {
             Reset Filters
           </button>
         </div>
-        <Table data={timetables} />
+        <Table data={timetables} timeslots={timeslots} />
       </main>
     </Layout>
   );
 };
 
-const Table = ({ data }) => {
-  // Unique timeslots for rows (left column)
-  const timeslots = [...new Set(data.flatMap(item => item.timeslots?.map(slot => slot.split(':')[1])))].sort();
+// Utility function to format timetable data
+const formatTimetableData = (scheduleData) => {
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const uniqueTimeslots = [...new Set(scheduleData.timeSlots.map(timeSlot => timeSlot.split(': ')[1]))];
 
-  // Days for columns (top row)
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  // Initialize timetable
+  let timetable = { 
+    days: daysOfWeek,
+    timeslots: uniqueTimeslots,
+    schedule: {}
+  };
 
-  return (
-    <>
-      {data.map((item) => (
-        <div key={item.id} className="timetable">
-          <h3 className="timetable-header">Timetable ID: {item.id}</h3>
-          <p className="message">{item.message}</p>
-          <table className="table-auto">
-            <thead>
-              <tr>
-                <th className="px-4 py-2">Timeslots</th>
-                {days.map(day => <th key={day} className="px-4 py-2">{day}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {timeslots.map((timeslot) => {
-                return (
-                  <tr key={timeslot}>
-                    <td className="border px-4 py-2">{timeslot}</td>
-                    {days.map(day => {
-const index = item.timeslots?.findIndex(slot => slot === `${day} ${timeslot}`);
-if (index !== -1) {
-                        return (
-                          <td key={day} className="border px-4 py-2">
-                            {`${item.courseCodes[index]} ${item.roomNames[index]} ${item.instructorNames[index]}`}
-                          </td>
-                        );
-                      } else {
-                        return <td key={day} className="border px-4 py-2"></td>;
-                      }
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      ))}
-    </>
-  );
+  // Initialize schedule with empty arrays
+  daysOfWeek.forEach(day => {
+    timetable.schedule[day] = Array(uniqueTimeslots.length).fill(null);
+  });
+
+  // Populate schedule with data
+  scheduleData.timeSlots.forEach((timeSlot, index) => {
+    const [day, timeslot] = timeSlot.split(': ');
+    const timetableIndex = uniqueTimeslots.indexOf(timeslot);
+
+    timetable.schedule[day][timetableIndex] = {
+      courseCode: scheduleData.courseCodes[index],
+      instructorName: scheduleData.instructorNames[index],
+      roomName: scheduleData.roomNames[index]
+    };
+  });
+
+  return timetable;
 };
 
 
+const Table = ({ data }) => {
+  return (
+    <>
+      {data.map((item) => {
+        const timetable = formatTimetableData(item);
+
+        return (
+          <div key={item.id} className="timetable">
+            <h3 className="timetable-header">Timetable ID: {item.id}</h3>
+            <p className="message">{item.message}</p>
+            <table className="table-auto">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2">Time Slot</th>
+                  {timetable.days.map(day => (
+                    <th key={day} className="px-4 py-2">{day}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {timetable.timeslots.map((timeslot, index) => (
+                  <tr key={timeslot}>
+                    <td className="border px-4 py-2">{timeslot}</td>
+                    {timetable.days.map(day => (
+                      <td key={day} className="border px-4 py-2">
+                        {timetable.schedule[day][index] ? 
+                          `${timetable.schedule[day][index].courseCode}, ${timetable.schedule[day][index].instructorName}, ${timetable.schedule[day][index].roomName}` : ''}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })}
+    </>
+  );
+};
 
 const Filter = ({ columns, onFilter }) => {
   const [filters, setFilters] = useState({});
