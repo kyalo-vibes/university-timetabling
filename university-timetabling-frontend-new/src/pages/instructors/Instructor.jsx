@@ -14,6 +14,9 @@ const Instructor = () => {
   const [lastName, setLastName] = useState("");
   const [selectedDeptName, setSelectedDeptName] = useState("");
   const [allPreferences, setAllPreferences] = useState([]);
+  const [timeslots, setTimeslots] = useState([]);
+  const [selectedTimeslot, setSelectedTimeslot] = useState("");
+  const [selectedInstructor, setSelectedInstructor] = useState("");
 
   const { auth } = useAuth();
   const navigate = useNavigate();
@@ -56,6 +59,20 @@ const Instructor = () => {
       .catch((error) => console.error(`Error: ${error}`));
   };
 
+  // Fetch all timeslots
+  const fetchTimeSlots = () => {
+    axios
+      .get("http://localhost:8080/api/timeslots", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setTimeslots(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+  };
+
   const fetchAllPreferences = () => {
     axios
       .get("http://localhost:8080/api/instructors/preferences", {
@@ -90,7 +107,7 @@ const Instructor = () => {
     if (selectedDeptName === "") {
       newDeptName = departments.length > 0 ? departments[0].deptName : "";
     }
-  
+
     const newInstructor = {
       firstName: firstName,
       lastName: lastName,
@@ -115,6 +132,7 @@ const Instructor = () => {
     fetchInstructors();
     fetchDepartments();
     fetchAllPreferences();
+    fetchTimeSlots();
   }, []);
 
   const handleDelete = (id) => {
@@ -129,6 +147,43 @@ const Instructor = () => {
       })
       .catch((error) => console.error(`Error: ${error}`));
     fetchInstructors();
+  };
+
+  const handleAddPreference = () => {
+    const instructorId = selectedInstructor;
+    const preferenceId = JSON.parse(selectedTimeslot).id;
+
+    const postData = {
+      timeslot: JSON.parse(selectedTimeslot),
+      instructorName: selectedInstructor,
+      // other form data
+    };
+
+    console.log(postData);
+
+    fetch(
+      `http://localhost:8080/api/instructors/${instructorId}/preferences/${preferenceId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify(postData),
+      }
+    )
+      .then((response) => {
+        if (response.ok) {
+          // Request was successful
+          // Handle success response
+          fetchAllPreferences();
+        } else {
+          // Request failed
+          // Handle error response
+        }
+      })
+      .catch((error) => {
+        // Handle network error
+      });
   };
 
   return (
@@ -168,6 +223,93 @@ const Instructor = () => {
                     </li>
                   ))}
                 </ul>
+                <div className="flex items-center justify-end">
+                  <label
+                    htmlFor="my-modal-2"
+                    className="text-purple-600 hover:text-purple-400 font-semibold ml-6"
+                  >
+                    Add preference
+                  </label>
+                  {/* Put this part before </body> tag */}
+                  <section className="w-1/3">
+                    <input
+                      type="checkbox"
+                      id="my-modal-2"
+                      className="modal-toggle"
+                    />
+                    <div className="modal">
+                      <div className="modal-box">
+                        <h3 className="font-bold text-lg">
+                          Add instructor preference
+                        </h3>
+                        <form>
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="timeslot" className="label ml-8">
+                              Time Slot
+                            </label>
+                            <select
+                              className="select select-info max-w-[65%]"
+                              as="select"
+                              id="programme"
+                              onChange={(e) =>
+                                setSelectedTimeslot(e.target.value)
+                              }
+                            >
+                              {timeslots.map((timeslot) => (
+                                <option
+                                  key={timeslot.id}
+                                  value={JSON.stringify(timeslot)}
+                                >
+                                  {`${timeslot.day} (${timeslot.startTime} - ${timeslot.endTime})`}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="department" className="label ml-8">
+                              Instructor
+                            </label>
+                            <select
+                              className="select select-info w-full max-w-[60%]"
+                              as="select"
+                              id="department"
+                              value={selectedInstructor}
+                              onChange={(e) =>
+                                setSelectedInstructor(e.target.value)
+                              }
+                            >
+                              {instructors.map((instructor) => (
+                                <option
+                                  key={instructor.id}
+                                  value={instructor.id}
+                                >
+                                  {instructor.firstName} {instructor.lastName}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="modal-action">
+                            <label
+                              htmlFor="my-modal-2"
+                              className="btn btn-success"
+                            >
+                              Cancel
+                            </label>
+                            <label
+                              onClick={handleAddPreference}
+                              htmlFor="my-modal-2"
+                              className="btn btn-primary"
+                            >
+                              Add
+                            </label>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </section>
+                </div>
               </div>
             </section>
 
@@ -230,18 +372,26 @@ const Instructor = () => {
                                 Department
                               </label>
                               <select
-  required="true"
-  className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-  value={selectedDeptName === "" ? departments[0]?.deptName : selectedDeptName}
-  onChange={(e) => setSelectedDeptName(e.target.value)}
->
-  {departments.map((department) => (
-    <option key={department.id} value={department.deptName}>
-      {department.deptName}
-    </option>
-  ))}
-</select>
-
+                                required="true"
+                                className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+                                value={
+                                  selectedDeptName === ""
+                                    ? departments[0]?.deptName
+                                    : selectedDeptName
+                                }
+                                onChange={(e) =>
+                                  setSelectedDeptName(e.target.value)
+                                }
+                              >
+                                {departments.map((department) => (
+                                  <option
+                                    key={department.id}
+                                    value={department.deptName}
+                                  >
+                                    {department.deptName}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
                             <div className="md:flex md: items-center mt-6">
                               <button

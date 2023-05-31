@@ -177,14 +177,70 @@ const Room = () => {
               </div>
             </div>
           </div>
-          <RoomTable rooms={rooms} />
+          <RoomTable data={rooms} />
         </div>
       </main>
     </DashboardLayout>
   );
 };
 
-const RoomTable = ({ rooms }) => {
+const RoomTable = ({ data }) => {
+  const [rooms, setRooms] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [roomName, setRoomName] = useState("");
+  const [roomCapacity, setRoomCapacity] = useState("");
+  const [roomType, setRoomType] = useState("");
+  const [isAvailable, setIsAvailable] = useState(true);
+  const [selectedDeptName, setSelectedDeptName] = useState("");
+
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+
+  const fetchDepartments = () => {
+    axios
+      .get("http://localhost:8080/api/departments", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setDepartments(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+  };
+
+  console.log(data);
+
+  const handleRoomUpdate = (id) => {
+    console.log(id);
+    const updatedRoom = {
+      id: id,
+      roomName: roomName,
+      roomCapacity: roomCapacity,
+      roomType: roomType,
+      isAvailable: isAvailable,
+      deptName: selectedDeptName,
+    };
+
+    axios
+      .put(`http://localhost:8080/api/rooms/${id}`, updatedRoom, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        // fetchCourses();
+        console.log(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+
+    // toggleModal();
+    // fetchCourses();
+  };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
@@ -211,7 +267,7 @@ const RoomTable = ({ rooms }) => {
           </tr>
         </thead>
         <tbody>
-          {rooms.map((room, index) => (
+          {data.map((room, index) => (
             <tr
               key={room.index}
               className={`${
@@ -229,12 +285,105 @@ const RoomTable = ({ rooms }) => {
               <td className="px-6 py-4">{room.deptName}</td>
               <td className="px-6 py-4">{room.available ? "Yes" : "No"}</td>
               <td className="px-6 py-4">
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Edit
-                </a>
+                <div>
+                  <label
+                    htmlFor="my-modal-2"
+                    className="text-purple-600 hover:text-purple-400 font-semibold ml-6"
+                  >
+                    Edit
+                  </label>
+                  {/* Put this part before </body> tag */}
+                  <input
+                    type="checkbox"
+                    id="my-modal-2"
+                    className="modal-toggle"
+                  />
+                  <div className="modal">
+                    <div className="modal-box">
+                      <h3 className="font-bold text-lg">Update the section</h3>
+                      <form>
+                        <div className="flex justify-between items-center mt-4">
+                          <label className="label">Room Name</label>
+                          <input
+                            className="input input-bordered w-full max-w-[70%]"
+                            type="text"
+                            value={roomName}
+                            onChange={(e) => setRoomName(e.target.value)}
+                          />
+                        </div>
+                        <div className="flex justify-between items-center mt-4">
+                          <label className="label">Room Capacity</label>
+                          <input
+                            className="input input-bordered w-full max-w-[70%]"
+                            type="number"
+                            value={roomCapacity}
+                            onChange={(e) => setRoomCapacity(e.target.value)}
+                          />
+                        </div>
+                        <div className="flex justify-between items-center mt-4">
+                          <label className="label">Room Type</label>
+                          <select
+                            className="select select-info w-full max-w-[70%]"
+                            as="select"
+                            value={roomType}
+                            onChange={(e) => setRoomType(e.target.value)}
+                          >
+                            <option value="LT">LT</option>
+                            <option value="SLT">SLT</option>
+                          </select>
+                        </div>
+                        <div className="flex justify-between items-center mt-4">
+                          <label className="cursor-pointer label">
+                            <span>Available</span>
+                          </label>
+                          <div className="w-full flex items-center justify-start ml-16">
+                            <input
+                              type="checkbox"
+                              checked={isAvailable}
+                              onChange={(e) => setIsAvailable(e.target.checked)}
+                              className="toggle toggle-accent "
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center mt-4">
+                          <label>Department</label>
+                          <select
+                            className="select select-info w-full max-w-[70%]"
+                            as="select"
+                            value={selectedDeptName}
+                            onChange={(e) =>
+                              setSelectedDeptName(e.target.value)
+                            }
+                          >
+                            {departments.map((department) => (
+                              <option
+                                key={department.id}
+                                value={department.deptName}
+                              >
+                                {department.deptName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="modal-action">
+                          <label
+                            htmlFor="my-modal-2"
+                            className="btn btn-success"
+                          >
+                            Cancel
+                          </label>
+                          <label
+                            onClick={() => handleRoomUpdate(room.id)}
+                            htmlFor="my-modal-2"
+                            className="btn btn-primary"
+                          >
+                            Update
+                          </label>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
               </td>
             </tr>
           ))}

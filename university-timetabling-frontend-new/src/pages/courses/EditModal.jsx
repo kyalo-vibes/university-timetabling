@@ -64,137 +64,131 @@ export default function EditModal({ courseId, toggleModal, fetchCourses }) {
 
   return (
     <section>
-      {/* The button to open modal */}
-      <label htmlFor="my-modal-3" className="btn">
-        open modal
-      </label>
+      <div
+        id="defaultModal"
+        tabindex="-1"
+        aria-hidden="true"
+        class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
+      >
+        <div class="relative w-full max-w-2xl max-h-full">
+          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <form>
+              <div className="flex justify-between items-center mt-4">
+                <label htmlFor="course_code" className="label ml-8">
+                  Course Code
+                </label>
+                <input
+                  className="input input-bordered w-full max-w-[60%]"
+                  type="text"
+                  id="course_code"
+                  value={courseCode}
+                  onChange={(e) => setCourseCode(e.target.value)}
+                />
+              </div>
 
-      {/* Put this part before </body> tag */}
-      <input type="checkbox" id="my-modal-3" className="modal-toggle" />
-      <div className="modal">
-        <div className="modal-box relative">
-          <label
-            htmlFor="my-modal-3"
-            className="btn btn-sm btn-circle absolute right-2 top-2"
-          >
-            ✕
-          </label>
-          <form>
-            <div className="flex justify-between items-center mt-4">
-              <label htmlFor="course_code" className="label ml-8">
-                Course Code
-              </label>
-              <input
-                className="input input-bordered w-full max-w-[60%]"
-                type="text"
-                id="course_code"
-                value={courseCode}
-                onChange={(e) => setCourseCode(e.target.value)}
-              />
-            </div>
+              <div className="flex justify-between items-center mt-4">
+                <label htmlFor="course_name" className="label ml-8">
+                  Course Name
+                </label>
+                <input
+                  className="input input-bordered w-full max-w-[60%]"
+                  type="text"
+                  id="course_name"
+                  value={courseName}
+                  onChange={(e) => setCourseName(e.target.value)}
+                />
+              </div>
 
-            <div className="flex justify-between items-center mt-4">
-              <label htmlFor="course_name" className="label ml-8">
-                Course Name
-              </label>
-              <input
-                className="input input-bordered w-full max-w-[60%]"
-                type="text"
-                id="course_name"
-                value={courseName}
-                onChange={(e) => setCourseName(e.target.value)}
-              />
-            </div>
+              <div className="flex justify-between items-center mt-4">
+                <label htmlFor="year" className="label ml-8">
+                  Year
+                </label>
+                <input
+                  className="input input-bordered w-full max-w-[60%]"
+                  type="number"
+                  id="year"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                />
+              </div>
 
-            <div className="flex justify-between items-center mt-4">
-              <label htmlFor="year" className="label ml-8">
-                Year
-              </label>
-              <input
-                className="input input-bordered w-full max-w-[60%]"
-                type="number"
-                id="year"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-              />
-            </div>
+              <div className="flex justify-between items-center mt-4">
+                <label htmlFor="semester" className="label ml-8">
+                  Semester
+                </label>
+                <input
+                  className="input input-bordered w-full max-w-[60%]"
+                  type="number"
+                  id="semester"
+                  value={semester}
+                  onChange={(e) => setSemester(e.target.value)}
+                />
+              </div>
 
-            <div className="flex justify-between items-center mt-4">
-              <label htmlFor="semester" className="label ml-8">
-                Semester
-              </label>
-              <input
-                className="input input-bordered w-full max-w-[60%]"
-                type="number"
-                id="semester"
-                value={semester}
-                onChange={(e) => setSemester(e.target.value)}
-              />
-            </div>
+              <div className="flex justify-between items-center mt-4">
+                <label htmlFor="programme" className="label ml-8">
+                  Programme
+                </label>
+                <select
+                  className="select select-info w-full max-w-[60%]"
+                  as="select"
+                  id="programme"
+                  value={selectedProgrammeName}
+                  onChange={(e) => setSelectedProgrammeName(e.target.value)}
+                >
+                  {programmes.map((programme) => (
+                    <option key={programme.id} value={programme.programmeName}>
+                      {programme.programmeName}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex justify-between items-center mt-4">
-              <label htmlFor="programme" className="label ml-8">
-                Programme
-              </label>
-              <select
-                className="select select-info w-full max-w-[60%]"
-                as="select"
-                id="programme"
-                value={selectedProgrammeName}
-                onChange={(e) => setSelectedProgrammeName(e.target.value)}
-              >
-                {programmes.map((programme) => (
-                  <option key={programme.id} value={programme.programmeName}>
-                    {programme.programmeName}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="flex justify-between items-center mt-4">
+                <label htmlFor="department" className="label ml-8">
+                  Department
+                </label>
+                <select
+                  className="select select-info w-full max-w-[60%]"
+                  as="select"
+                  id="department"
+                  value={selectedDeptName}
+                  onChange={(e) => setSelectedDeptName(e.target.value)}
+                >
+                  {departments.map((department) => (
+                    <option key={department.id} value={department.deptName}>
+                      {department.deptName}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex justify-between items-center mt-4">
-              <label htmlFor="department" className="label ml-8">
-                Department
-              </label>
-              <select
-                className="select select-info w-full max-w-[60%]"
-                as="select"
-                id="department"
-                value={selectedDeptName}
-                onChange={(e) => setSelectedDeptName(e.target.value)}
-              >
-                {departments.map((department) => (
-                  <option key={department.id} value={department.deptName}>
-                    {department.deptName}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="flex justify-between items-center mt-4">
+                <label htmlFor="instructor" className="label ml-8">
+                  Instructor
+                </label>
+                <select
+                  className="select select-info w-full max-w-[60%]"
+                  as="select"
+                  id="instructor"
+                  value={selectedInstructorName}
+                  onChange={(e) => setSelectedInstructorName(e.target.value)}
+                >
+                  {instructors.map((instructor) => (
+                    <option key={instructor.id} value={instructor.firstName}>
+                      {instructor.firstName}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex justify-between items-center mt-4">
-              <label htmlFor="instructor" className="label ml-8">
-                Instructor
-              </label>
-              <select
-                className="select select-info w-full max-w-[60%]"
-                as="select"
-                id="instructor"
-                value={selectedInstructorName}
-                onChange={(e) => setSelectedInstructorName(e.target.value)}
-              >
-                {instructors.map((instructor) => (
-                  <option key={instructor.id} value={instructor.firstName}>
-                    {instructor.firstName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex justify-end my-4">
-              <button className="btn btn-primary" onClick={handleUpdate}>
-                Update Course
-              </button>
-            </div>
-          </form>
+              <div className="flex justify-end my-4">
+                <button className="btn btn-primary" onClick={handleUpdate}>
+                  Update Course
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </section>
