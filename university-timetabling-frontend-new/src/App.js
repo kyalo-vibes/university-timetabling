@@ -16,6 +16,8 @@ import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
 import LandingPage from "./pages/landing-page/LandingPage";
 import Unauthorized from "./pages/unauthorized/Unauthorized";
+import StudentTimetable from "./pages/students/StudentTimetable";  // Adjust the path according to your project structure
+
 
 const ROLES = {
   student: "STUDENT",
@@ -45,11 +47,16 @@ function App() {
         </Route>
 
         <Route
-          element={
-            <RequireAuth allowedRoles={[ROLES.instructor, ROLES.admin]} />
-          }
+          element={<RequireAuth allowedRoles={[ROLES.instructor, ROLES.admin]} />}
         >
           <Route path="instructor" element={<Instructor />} />
+          <Route path="instructor-timetable" element={<InstructorTimetable />} />
+        </Route>
+
+        <Route
+          element={<RequireAuth allowedRoles={[ROLES.student]} />}
+        >
+          <Route path="student-timetable" element={<StudentTimetable />} />
         </Route>
 
         <Route element={<RequireAuth allowedRoles={[ROLES.admin]} />}>
@@ -63,10 +70,6 @@ function App() {
           <Route
             path="instructor-preference"
             element={<InstructorPreference />}
-          />
-          <Route
-            path="instructor-timetable"
-            element={<InstructorTimetable />}
           />
         </Route>
         {/* end of protected routes */}

@@ -51,7 +51,14 @@ export default function Login() {
   
       setUser("");
       setPwd("");
-      navigate(from, { replace: true });
+  
+      if (role === "INSTRUCTOR") {
+        navigate("/instructor-timetable");
+      } else if (role === "STUDENT") {
+        navigate("/student-timetable"); // New condition for student
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       if (!err?.res) {
         setErrMsg("No server response");
@@ -74,7 +81,7 @@ export default function Login() {
           className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
         >
           <img className="w-8 h-8 mr-2" src="logoTimetable.svg" alt="logo" />
-          TimeTable Schedules
+          University Timetabling System
         </Link>
         <p
           ref={errRef}
