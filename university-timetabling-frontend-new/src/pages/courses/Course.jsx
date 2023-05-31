@@ -46,6 +46,7 @@ const Course = () => {
   }
 
   function handleEdit(id) {
+    console.log(id);
     setEditingCourseId(id);
     setShowModal(true);
   }
@@ -160,6 +161,7 @@ const Course = () => {
       })
       .then((response) => {
         // Handle successful delete
+        console.log(response.status);
       })
       .catch((error) => console.error(`Error: ${error}`));
     // redisplay table
@@ -339,13 +341,6 @@ const Course = () => {
             handleDelete={handleDelete}
             handleEdit={handleEdit}
           />
-          {showModal && (
-            <EditModal
-              courseId={editingCourseId}
-              toggleModal={toggleModal}
-              fetchCourses={fetchCourses}
-            />
-          )}
 
           <div className="flex justify-between mt-4">
             <button
@@ -368,7 +363,87 @@ const Course = () => {
   );
 };
 
-const CourseTable = ({ courses, handleDelete, handleEdit }) => {
+const CourseTable = ({ courses, handleDelete }) => {
+  const [departments, setDepartments] = useState([]);
+  const [programmes, setProgrammes] = useState([]);
+  const [instructors, setInstructors] = useState([]);
+  const [courseCode, setCourseCode] = useState("");
+  const [courseName, setCourseName] = useState("");
+  const [year, setYear] = useState("");
+  const [semester, setSemester] = useState("");
+  const [selectedProgrammeName, setSelectedProgrammeName] = useState("");
+  const [selectedDeptName, setSelectedDeptName] = useState("");
+  const [selectedInstructorName, setSelectedInstructorName] = useState("");
+
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch departments
+    axios
+      .get("http://localhost:8080/api/departments", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setDepartments(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+
+    // Fetch programmes
+    axios
+      .get("http://localhost:8080/api/programs", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setProgrammes(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+
+    // Fetch instructors
+    axios
+      .get("http://localhost:8080/api/instructors", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setInstructors(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+  }, []);
+
+  const handleUpdate = (id) => {
+    console.log(id);
+    const updatedCourse = {
+      courseCode: courseCode,
+      courseName: courseName,
+      year: parseInt(year, 10),
+      semester: parseInt(semester, 10),
+      programmeName: selectedProgrammeName,
+      deptName: selectedDeptName,
+      instructorName: selectedInstructorName,
+    };
+
+    axios
+      .put(`http://localhost:8080/api/courses/${id}`, updatedCourse, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        // fetchCourses();
+        console.log(response.data);
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+
+    // toggleModal();
+    // fetchCourses();
+  };
+
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
@@ -407,7 +482,7 @@ const CourseTable = ({ courses, handleDelete, handleEdit }) => {
             >
               <th
                 scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
+                className="px-6 py-4 font-medium text-gray-900 whitespace "
               >
                 {course.courseName} ({course.courseCode})
               </th>
@@ -452,13 +527,172 @@ const CourseTable = ({ courses, handleDelete, handleEdit }) => {
                       </div>
                     </div>
                   </div>
+                  <div>
+                    <label
+                      htmlFor="my-modal-2"
+                      className="text-purple-600 hover:text-purple-400 font-semibold ml-6"
+                    >
+                      Edit
+                    </label>
+                    {/* Put this part before </body> tag */}
+                    <input
+                      type="checkbox"
+                      id="my-modal-2"
+                      className="modal-toggle"
+                    />
+                    <div className="modal">
+                      <div className="modal-box">
+                        <h3 className="font-bold text-lg">
+                          Update the instructor
+                        </h3>
+                        <form>
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="course_code" className="label ml-8">
+                              Course Code
+                            </label>
+                            <input
+                              className="input input-bordered w-full max-w-[60%]"
+                              type="text"
+                              id="course_code"
+                              value={courseCode}
+                              onChange={(e) => setCourseCode(e.target.value)}
+                            />
+                          </div>
 
-                  <button
-                    onClick={() => handleEdit(course.id)}
-                    className="text-purple-600 hover:text-purple-400 font-semibold ml-6"
-                  >
-                    Edit
-                  </button>
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="course_name" className="label ml-8">
+                              Course Name
+                            </label>
+                            <input
+                              className="input input-bordered w-full max-w-[60%]"
+                              type="text"
+                              id="course_name"
+                              value={courseName}
+                              onChange={(e) => setCourseName(e.target.value)}
+                            />
+                          </div>
+
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="year" className="label ml-8">
+                              Year
+                            </label>
+                            <input
+                              className="input input-bordered w-full max-w-[60%]"
+                              type="number"
+                              min={1}
+                              max={6}
+                              id="year"
+                              value={year}
+                              onChange={(e) => setYear(e.target.value)}
+                            />
+                          </div>
+
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="semester" className="label ml-8">
+                              Semester
+                            </label>
+                            <input
+                              className="input input-bordered w-full max-w-[60%]"
+                              type="number"
+                              min={1}
+                              max={2}
+                              id="semester"
+                              value={semester}
+                              onChange={(e) => setSemester(e.target.value)}
+                            />
+                          </div>
+
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="programme" className="label ml-8">
+                              Programme
+                            </label>
+                            <select
+                              className="select select-info w-full max-w-[60%]"
+                              as="select"
+                              id="programme"
+                              value={selectedProgrammeName}
+                              onChange={(e) =>
+                                setSelectedProgrammeName(e.target.value)
+                              }
+                            >
+                              {programmes.map((programme) => (
+                                <option
+                                  key={programme.id}
+                                  value={programme.programmeName}
+                                >
+                                  {programme.programmeName}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="department" className="label ml-8">
+                              Department
+                            </label>
+                            <select
+                              className="select select-info w-full max-w-[60%]"
+                              as="select"
+                              id="department"
+                              value={selectedDeptName}
+                              onChange={(e) =>
+                                setSelectedDeptName(e.target.value)
+                              }
+                            >
+                              {departments.map((department) => (
+                                <option
+                                  key={department.id}
+                                  value={department.deptName}
+                                >
+                                  {department.deptName}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="flex justify-between items-center mt-4">
+                            <label htmlFor="instructor" className="label ml-8">
+                              Instructor
+                            </label>
+                            <select
+                              className="select select-info w-full max-w-[60%]"
+                              as="select"
+                              id="instructor"
+                              value={selectedInstructorName}
+                              onChange={(e) =>
+                                setSelectedInstructorName(e.target.value)
+                              }
+                            >
+                              {instructors.map((instructor) => (
+                                <option
+                                  key={instructor.id}
+                                  value={instructor.firstName}
+                                >
+                                  {instructor.firstName}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="modal-action">
+                            <label
+                              htmlFor="my-modal-2"
+                              className="btn btn-success"
+                            >
+                              Cancel
+                            </label>
+                            <label
+                              htmlFor="my-modal-2"
+                              className="btn btn-primary"
+                              onClick={() => handleUpdate(course.id)}
+                            >
+                              Update
+                            </label>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                    <section></section>
+                  </div>
                 </div>
               </td>
             </tr>
