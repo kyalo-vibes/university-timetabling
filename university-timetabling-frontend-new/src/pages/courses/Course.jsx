@@ -691,7 +691,6 @@ const CourseTable = ({ courses, handleDelete }) => {
                         </form>
                       </div>
                     </div>
-                    <section></section>
                   </div>
                 </div>
               </td>
