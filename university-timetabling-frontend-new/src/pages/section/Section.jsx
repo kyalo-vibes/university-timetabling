@@ -186,13 +186,25 @@ const SectionTable = ({ sections }) => {
         <thead className="text-xs text-gray-700 uppercase bg-gray-50  ">
           <tr>
             <th scope="col" className="px-6 py-3">
+<<<<<<< Updated upstream
               Number of Classes
+||||||| Stash base
+              Section ID
+=======
+            Number of Classes
+>>>>>>> Stashed changes
             </th>
             <th scope="col" className="px-6 py-3">
+<<<<<<< Updated upstream
               Course Name
+||||||| Stash base
+              Number of Classes
+=======
+            Course
+>>>>>>> Stashed changes
             </th>
             <th scope="col" className="px-6 py-3">
-              Course
+            Action  
             </th>
           </tr>
         </thead>

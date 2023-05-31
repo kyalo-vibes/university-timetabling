@@ -126,6 +126,8 @@ const Room = () => {
                       >
                         <option value="LT">LT</option>
                         <option value="SLT">SLT</option>
+                        <option value="LAB">LAB</option>
+                        <option value="HALL">HALL</option>
                       </select>
                     </div>
                     <div className="flex justify-between items-center mt-4">

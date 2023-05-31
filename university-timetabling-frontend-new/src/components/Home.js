@@ -218,6 +218,12 @@ const Home = () => {
 };
 
 const Table = ({ data }) => {
+  // Unique timeslots for rows (left column)
+  const timeslots = [...new Set(data.flatMap(item => item.timeslots?.map(slot => slot.split(':')[1])))].sort();
+
+  // Days for columns (top row)
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
   return (
     <>
       {data.map((item) => (
@@ -227,23 +233,30 @@ const Table = ({ data }) => {
           <table className="table-auto">
             <thead>
               <tr>
-                <th className="px-4 py-2">Course Codes</th>
-                <th className="px-4 py-2">Time Slots</th>
-                <th className="px-4 py-2">Instructor Names</th>
-                <th className="px-4 py-2">Room Names</th>
+                <th className="px-4 py-2">Timeslots</th>
+                {days.map(day => <th key={day} className="px-4 py-2">{day}</th>)}
               </tr>
             </thead>
             <tbody>
-              {item.courseCodes.map((courseCode, index) => (
-                <tr key={`${item.id}-${index}`}>
-                  <td className="border px-4 py-2">{courseCode}</td>
-                  <td className="border px-4 py-2">{item.timeSlots[index]}</td>
-                  <td className="border px-4 py-2">
-                    {item.instructorNames[index]}
-                  </td>
-                  <td className="border px-4 py-2">{item.roomNames[index]}</td>
-                </tr>
-              ))}
+              {timeslots.map((timeslot) => {
+                return (
+                  <tr key={timeslot}>
+                    <td className="border px-4 py-2">{timeslot}</td>
+                    {days.map(day => {
+const index = item.timeslots?.findIndex(slot => slot === `${day} ${timeslot}`);
+if (index !== -1) {
+                        return (
+                          <td key={day} className="border px-4 py-2">
+                            {`${item.courseCodes[index]} ${item.roomNames[index]} ${item.instructorNames[index]}`}
+                          </td>
+                        );
+                      } else {
+                        return <td key={day} className="border px-4 py-2"></td>;
+                      }
+                    })}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -251,6 +264,7 @@ const Table = ({ data }) => {
     </>
   );
 };
+
 
 
 const Filter = ({ columns, onFilter }) => {
