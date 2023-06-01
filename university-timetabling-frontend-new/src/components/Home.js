@@ -20,7 +20,7 @@ const Home = () => {
   const [timeslots, setTimeslots] = useState([]);
   
 
-const fetchTimeslots = () => {
+  const fetchTimeslots = () => {
     axios
       .get("http://localhost:8080/api/timeslots", {
         headers: {
@@ -28,15 +28,14 @@ const fetchTimeslots = () => {
         },
       })
       .then((response) => {
-        setTimeslots(response.data.map(timeslot => `${timeslot.day}: ${timeslot.startTime} - ${timeslot.endTime}`));
+        setTimeslots(response.data.map(timeslot => {
+          const startHour = timeslot.startTime.slice(0, 5);
+          const endHour = timeslot.endTime.slice(0, 5);
+          return `${timeslot.day}: ${startHour} - ${endHour}`;
+        }));
       })
       .catch((error) => console.error(`Error: ${error}`));
 };
-
-useEffect(() => {
-  fetchTimeslots();
-}, []);
-
 
   
   // Function to generate timetable
@@ -170,6 +169,12 @@ useEffect(() => {
 
   console.log(timetables);
 
+  useEffect(() => {
+    fetchTimeslots();
+  }, []);
+
+  console.log(timeslots);
+
   // handle logout
   async function logout() {
     setAuth({});
@@ -242,9 +247,8 @@ useEffect(() => {
 };
 
 // Utility function to format timetable data
-const formatTimetableData = (scheduleData) => {
+const formatTimetableData = (scheduleData, uniqueTimeslots) => {
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  const uniqueTimeslots = [...new Set(scheduleData.timeSlots.map(timeSlot => timeSlot.split(': ')[1]))];
 
   // Initialize timetable
   let timetable = { 
@@ -261,24 +265,30 @@ const formatTimetableData = (scheduleData) => {
   // Populate schedule with data
   scheduleData.timeSlots.forEach((timeSlot, index) => {
     const [day, timeslot] = timeSlot.split(': ');
-    const timetableIndex = uniqueTimeslots.indexOf(timeslot);
+    const timeslotStripped = timeslot.trim(); // remove leading and trailing spaces
+    const timetableIndex = uniqueTimeslots.indexOf(timeslotStripped);
 
-    timetable.schedule[day][timetableIndex] = {
-      courseCode: scheduleData.courseCodes[index],
-      instructorName: scheduleData.instructorNames[index],
-      roomName: scheduleData.roomNames[index]
-    };
+    if (timetableIndex !== -1) {
+      timetable.schedule[day][timetableIndex] = {
+        courseCode: scheduleData.courseCodes[index],
+        instructorName: scheduleData.instructorNames[index],
+        roomName: scheduleData.roomNames[index]
+      };
+    }
   });
 
   return timetable;
 };
 
 
-const Table = ({ data }) => {
+const Table = ({ data, timeslots }) => {
+  // Extract unique timeslots from the timeslots prop
+  const uniqueTimeslots = [...new Set(timeslots.map(timeSlot => timeSlot.split(': ')[1]))];
+
   return (
     <>
       {data.map((item) => {
-        const timetable = formatTimetableData(item);
+        const timetable = formatTimetableData(item, uniqueTimeslots);
 
         return (
           <div key={item.id} className="timetable">
@@ -287,9 +297,9 @@ const Table = ({ data }) => {
             <table className="table-auto">
               <thead>
                 <tr>
-                  <th className="px-4 py-2">Time Slot</th>
+                  <th className="px-4 py-2 border">Time Slot</th>
                   {timetable.days.map(day => (
-                    <th key={day} className="px-4 py-2">{day}</th>
+                    <th key={day} className="px-4 py-2 border">{day}</th>
                   ))}
                 </tr>
               </thead>
@@ -298,9 +308,14 @@ const Table = ({ data }) => {
                   <tr key={timeslot}>
                     <td className="border px-4 py-2">{timeslot}</td>
                     {timetable.days.map(day => (
-                      <td key={day} className="border px-4 py-2">
+                      <td key={day} className={`border px-4 py-2 ${timetable.schedule[day][index] ? '' : 'shaded'}`}>
                         {timetable.schedule[day][index] ? 
-                          `${timetable.schedule[day][index].courseCode}, ${timetable.schedule[day][index].instructorName}, ${timetable.schedule[day][index].roomName}` : ''}
+                          <>
+                            <div>{timetable.schedule[day][index].courseCode}</div>
+                            <div>{timetable.schedule[day][index].instructorName}</div>
+                            <div>{timetable.schedule[day][index].roomName}</div>
+                          </> 
+                          : ''}
                       </td>
                     ))}
                   </tr>
@@ -313,6 +328,10 @@ const Table = ({ data }) => {
     </>
   );
 };
+
+
+
+
 
 const Filter = ({ columns, onFilter }) => {
   const [filters, setFilters] = useState({});
