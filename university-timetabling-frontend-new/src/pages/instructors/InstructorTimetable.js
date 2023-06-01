@@ -10,6 +10,8 @@ const InstructorTimetable = () => {
   const { auth, setAuth } = useAuth();
   const navigate = useNavigate();
   const [timetable, setTimetable] = useState([]);
+  const [timeslots, setTimeslots] = useState([]);
+
 
   // Fetch timetable of an instructor
   const fetchTimetable = () => {
@@ -25,6 +27,23 @@ const InstructorTimetable = () => {
       .catch((error) => console.error(`Error: ${error}`));
   };
 
+  const fetchTimeslots = () => {
+    axios
+      .get("http://localhost:8080/api/timeslots", {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setTimeslots(response.data.map(timeslot => {
+          const startHour = timeslot.startTime.slice(0, 5);
+          const endHour = timeslot.endTime.slice(0, 5);
+          return `${timeslot.day}: ${startHour} - ${endHour}`;
+        }));
+      })
+      .catch((error) => console.error(`Error: ${error}`));
+};
+
   // handle logout
   const logout = () => {
     setAuth({});
@@ -36,6 +55,18 @@ const InstructorTimetable = () => {
     fetchTimetable();
   }, []);
 
+  console.log(timetable);
+  useEffect(() => {
+    fetchTimeslots();
+  }, []);
+
+  useEffect(() => {
+    console.log(timetable);
+  }, [timetable]);
+  
+
+  console.log(timeslots);
+
   return (
     <Layout>
       <main>
@@ -46,35 +77,114 @@ const InstructorTimetable = () => {
           </Button>
         </section>
         <h2>Timetable</h2>
-        <Table data={timetable} />
+        <Table data={timetable} timeslots={timeslots} />
       </main>
     </Layout>
   );
 };
 
-const Table = ({ data }) => {
+
+const formatTimetableData = (scheduleData, uniqueTimeslots) => {
+  console.log("Inside format timetable", scheduleData); // Add this line
+  const objString = JSON.stringify(scheduleData);
+  console.log(objString);
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
+  // Initialize timetable
+  let timetable = { 
+    days: daysOfWeek,
+    timeslots: uniqueTimeslots,
+    schedule: {}
+  };
+
+  // Initialize schedule with empty arrays
+  daysOfWeek.forEach(day => {
+    timetable.schedule[day] = Array(uniqueTimeslots.length).fill(null);
+  });
+
+  // Make sure we have schedule data
+  if (scheduleData) {
+    console.log('scheduleData exists'); // Log if scheduleData exists
+    
+    // Check if timeSlots property exists on scheduleData
+    if (scheduleData.timeSlots) {
+      console.log('scheduleData.timeSlots exists'); // Log if scheduleData.timeSlots exists
+
+      scheduleData.timeSlots.forEach((timeSlot, index) => {
+        const day = timeSlot.split(' ')[0];
+        const timeslotStripped = timeSlot.replace(day, '').trim(); 
+
+        const timetableIndex = uniqueTimeslots.indexOf(timeslotStripped);
+
+        if (timetableIndex !== -1) {
+          timetable.schedule[day][timetableIndex] = {  
+            courseCode: scheduleData.courseCodes[index],
+            roomName: scheduleData.roomNames[index]
+          };
+        }
+      });
+    } else {
+      console.log('scheduleData.timeSlots does not exist'); // Log if scheduleData.timeSlots does not exist
+    }
+  } else {
+    console.log('No schedule data'); // Log if scheduleData does not exist
+  }
+
+  return timetable;
+};
+
+
+
+
+
+
+
+
+const Table = ({ data, timeslots }) => {
+  console.log("Inside table component", data); // Add this line
+  // Extract unique timeslots from the timeslots prop
+  const uniqueTimeslots = [...new Set(timeslots.map(timeSlot => timeSlot.split(': ')[1]))];
+
+// Check if data is an array and take the first element
+const scheduleData = Array.isArray(data) ? data[0] : data;
+
+  // As there's only one timetable, we don't need to map over data
+  const timetable = formatTimetableData(scheduleData, uniqueTimeslots);
+
   return (
-    <table className="table-auto">
-      <thead>
-        <tr>
-          <th className="px-4 py-2">Course Code</th>
-          <th className="px-4 py-2">Time Slot</th>
-          <th className="px-4 py-2">Room Name</th>
-        </tr>
-      </thead>
-      <tbody>
-        {Object.keys(data).map((instructor) =>
-          data[instructor].courseCodes.map((course, index) => (
-            <tr key={`${instructor}-${index}`}>
-              <td className="border px-4 py-2">{course}</td>
-              <td className="border px-4 py-2">{data[instructor].timeSlots[index]}</td>
-              <td className="border px-4 py-2">{data[instructor].roomNames[index]}</td>
+    <div className="timetable">
+      <h3 className="timetable-header">Timetable for Instructor {scheduleData.instructorNames}</h3>
+      <p className="message">{data.message}</p>
+      <table className="table-auto">
+        <thead>
+          <tr>
+            <th className="px-4 py-2 border">Time Slot</th>
+            {timetable.days.map(day => (
+              <th key={day} className="px-4 py-2 border">{day}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {timetable.timeslots.map((timeslot, index) => (
+            <tr key={timeslot}>
+              <td className="border px-4 py-2">{timeslot}</td>
+              {timetable.days.map(day => (
+                <td key={day} className={`border px-4 py-2 ${timetable.schedule[day][index] ? '' : 'shaded'}`}>
+                  {timetable.schedule[day][index] ? 
+                    <>
+                      <div>{timetable.schedule[day][index].courseCode}</div>
+                      <div>{timetable.schedule[day][index].roomName}</div>
+                    </> 
+                    : ''}
+                </td>
+              ))}
             </tr>
-          ))
-        )}
-      </tbody>
-    </table>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
+
 
 export default InstructorTimetable;

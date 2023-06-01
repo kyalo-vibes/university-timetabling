@@ -76,8 +76,8 @@ public class ScheduleController {
 
     @PreAuthorize("hasAuthority('INSTRUCTOR')")
     @GetMapping("/instructor")
-    public ResponseEntity<Map<String, ScheduleResult>> getSchedulesForInstructor(Principal principal) {
-        Map<String, ScheduleResult> scheduleResults = scheduleService.getSchedulesForInstructor(principal.getName());
+    public ResponseEntity<List<ScheduleResult>> getSchedulesForInstructor(Principal principal) {
+        List<ScheduleResult> scheduleResults = scheduleService.getSchedulesForInstructor(principal.getName());
         if(scheduleResults.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

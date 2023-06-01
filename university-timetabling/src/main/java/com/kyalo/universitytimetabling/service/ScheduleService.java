@@ -152,8 +152,8 @@ public class ScheduleService {
 
 
 
-    public Map<String, ScheduleResult> getSchedulesForInstructor(String username) {
-        Map<String, ScheduleResult> scheduleResults = new HashMap<>();
+    public List<ScheduleResult> getSchedulesForInstructor(String username) {
+        List<ScheduleResult> scheduleResults = new ArrayList<>();
 
         // Get the instructor for the current user
         User user = userRepository.findByUsername(username)
@@ -192,7 +192,7 @@ public class ScheduleService {
             result.setRoomNames(roomNames);
             result.setTimeSlots(timeSlots);
             result.setMessage(key);
-            scheduleResults.put(key, result);
+            scheduleResults.add(result);
         }
 
         return scheduleResults;
