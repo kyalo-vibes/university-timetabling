@@ -153,7 +153,7 @@ const scheduleData = Array.isArray(data) ? data[0] : data;
 
   return (
     <div className="timetable">
-      <h3 className="timetable-header">Timetable for Instructor {scheduleData.instructorNames}</h3>
+      <h3 className="timetable-header">Timetable for Instructor</h3>
       <p className="message">{data.message}</p>
       <table className="table-auto">
         <thead>

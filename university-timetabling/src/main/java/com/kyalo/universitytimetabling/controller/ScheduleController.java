@@ -69,7 +69,7 @@ public class ScheduleController {
 
     @PreAuthorize("hasAuthority('STUDENT')")
     @GetMapping("/myTimetable")
-    public Map<String, ScheduleResult> getSchedulesForLoggedInUser(Principal principal) {
+    public List<ScheduleResult> getSchedulesForLoggedInUser(Principal principal) {
         return scheduleService.getSchedulesForLoggedInUser(principal.getName());
     }
 
