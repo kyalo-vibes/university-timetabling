@@ -43,24 +43,24 @@ const Section = () => {
   };
 
   // Add a new section
-  const addSection = () => {
-    const newSection = {
-      numberOfClasses: numberOfClasses,
-      courseName: selectedCourseName,
-    };
-
-    axios
-      .post("http://localhost:8080/api/sections", newSection, {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
-      })
-      .then((response) => {
-        alert("Section added");
-        fetchSections();
-      })
-      .catch((error) => console.error(`Error: ${error}`));
+const addSection = () => {
+  const newSection = {
+    numberOfClasses: numberOfClasses,
+    courseName: selectedCourseName || courses[0].courseName, // Use the first course if no selection is made
   };
+
+  axios
+    .post("http://localhost:8080/api/sections", newSection, {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+    })
+    .then((response) => {
+      alert("Section added");
+      fetchSections();
+    })
+    .catch((error) => console.error(`Error: ${error}`));
+};
 
   useEffect(() => {
     fetchSections();
@@ -103,17 +103,18 @@ const Section = () => {
                     <div className="flex justify-between items-center mt-4">
                       <label className="label">Course</label>
                       <select
-                        className="input input-bordered w-full max-w-[50%]"
-                        as="select"
-                        value={selectedCourseName}
-                        onChange={(e) => setSelectedCourseName(e.target.value)}
-                      >
-                        {courses.map((course) => (
-                          <option key={course.id} value={course.courseName}>
-                            {course.courseName}
-                          </option>
-                        ))}
-                      </select>
+  className="input input-bordered w-full max-w-[50%]"
+  as="select"
+  value={selectedCourseName}
+  onChange={(e) => setSelectedCourseName(e.target.value)}
+>
+  <option value="">-- Select Course --</option> {/* Add an empty option */}
+  {courses.map((course) => (
+    <option key={course.id} value={course.courseName}>
+      {course.courseName}
+    </option>
+  ))}
+</select>
                     </div>
                     <button className="btn btn-primary" type="submit">
                       Add Section
