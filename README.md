@@ -1,116 +1,75 @@
-# Class Schedule API
+## Demo
 
-This project provides an API for managing a class schedule at a university level. It's built with Java and uses Spring Boot for the backend. The scheduling algorithm uses iterative forward search with backtracking.
+https://github.com/kyalo-vibes/university-timetabling/assets/95200602/ddc2628b-e5c9-442a-810a-8609dde5c040
+
+# University Timetabling System
+
+The University Timetabling System is a software application designed to automate the process of generating timetables for university programs. It aims to efficiently schedule courses, instructors, and rooms while considering various constraints and requirements.
 
 ## Features
 
-- Scheduling for all programs and all years in a program. If it's a 4-year program, 4 timetables are generated from 1st year up to 4th year.
-- Scheduling is done for courses only for the specified semester.
-- Able to schedule inter-faculty courses without collision.
-- Ensures a lecturer is not given two courses to teach at the same time.
-- Ensures a student does not have a common course and faculty course scheduled at the same time. Common courses start with a course code of 'CCS'.
-- Checks room availability and department relevance before scheduling.
-- View schedules by instructor.
-- View schedules for a specific program, year, and semester.
-- Each schedule includes the course code, instructor name, room name, and time slot.
-
-## Hard Constraints
-
-- Room availability.
-- Instructor availability.
-
-## Soft Constraints
-
-- Preferred time slot.
-
-## Optimization Ideas
-
-- Use a heuristic to choose the most promising course to schedule next, rather than always going in order.
-- Try to schedule the most difficult courses first (those with the fewest available rooms or time slots).
-- Implement some form of local search or constraint propagation to prune the search space.
+- **Scheduling for All Programs**: The system supports scheduling for all university programs, ensuring that each program has a dedicated timetable.
+- **Scheduling for All Years**: If a program spans multiple years, the system generates separate timetables for each year, providing a comprehensive overview.
+- **Semester-Specific Scheduling**: Scheduling is done specifically for the semester specified, enabling accurate planning and organization.
+- **Inter-Faculty Course Scheduling**: The system can schedule courses from different faculties without collisions, allowing for interdisciplinary learning opportunities.
+- **No Overlapping Lectures**: Lecturers are not assigned to teach two courses at the same time, ensuring an optimal teaching schedule.
+- **Common Course and Faculty Course Conflict Avoidance**: Students are not assigned both a common course and a faculty-specific course at the same time, preventing conflicts in their schedules.
+- **Room Availability Checking**: The system checks room availability before scheduling a course, preventing double-bookings and ensuring efficient utilization of resources.
+- **Department-Based Room Assignment**: Rooms are assigned based on the department of the course, providing a suitable environment for each subject.
+- **Scheduling per Semester**: Timetables are generated for each semester independently, accommodating different course offerings and faculty availability.
+- **Scheduling Algorithm**: The system implements an iterative forward search algorithm with backtracking to generate timetables efficiently.
+- **Optimization Techniques**: Heuristics, local search, and constraint propagation are implemented to optimize the scheduling algorithm and improve the quality of the timetables.
 
 ## Project Structure
 
-The project is organized as follows:
-com.kyalo.universitytimetabling
-│
-├── domain
-│   ├── Course.java
-│   ├── Department.java
-│   ├── Faculty.java
-│   ├── Instructor.java
-│   ├── Program.java
-│   ├── Room.java
-│   ├── Schedule.java
-│   ├── Section.java
-│   └── TimeSlot.java
-│
-├── repository
-│   ├── CourseRepository.java
-│   ├── DepartmentRepository.java
-│   ├── FacultyRepository.java
-│   ├── InstructorRepository.java
-│   ├── ProgramRepository.java
-│   ├── RoomRepository.java
-│   ├── ScheduleRepository.java
-│   ├── SectionRepository.java
-│   └── TimeSlotRepository.java
-│
-├── service
-│   ├── CourseService.java
-│   ├── DepartmentService.java
-│   ├── FacultyService.java
-│   ├── InstructorService.java
-│   ├── ProgramService.java
-│   ├── RoomService.java
-│   ├── ScheduleService.java
-│   ├── SectionService.java
-│   └── TimeSlotService.java
-│
-└── controller
-    ├── CourseController.java
-    ├── DepartmentController.java
-    ├── FacultyController.java
-    ├── InstructorController.java
-    ├── ProgramController.java
-    ├── RoomController.java
-    ├── ScheduleController.java
-    ├── SectionController.java
-    └── TimeSlotController.java
+The project follows a structured layout to ensure maintainability and modularity. The main components of the project are:
 
-## Getting Started
+- **Domain**: Contains the domain models representing entities such as courses, departments, faculties, instructors, programs, rooms, schedules, sections, and timeslots.
+- **Repository**: Provides repositories for each entity, responsible for data access and persistence.
+- **Service**: Contains service classes that implement the business logic and handle the scheduling process.
+- **Controller**: Provides REST API endpoints for interacting with the system, allowing clients to retrieve, create, update, and delete data.
 
-### Prerequisites
+## Scheduling Algorithm
 
-- Java 11+
-- Maven
-- MySQL
+The scheduling algorithm follows the following steps:
 
-### Installation
+1. **Heuristic Function**: Define a heuristic function to determine the next best action in the scheduling process. For example, selecting the course with the fewest available timeslots or rooms.
+2. **Evaluation Function**: Implement an evaluation function to assess the quality of a schedule based on constraints. Consider factors like constraint violations, instructor workload balance, and class distribution.
+3. **Backtracking Function**: Implement a backtracking function to undo actions that lead to constraint violations. Use the evaluation function to choose the best action during backtracking.
+4. **Scheduling Algorithm**: Implement an iterative forward search with backtracking. Start by assigning a course to a timeslot and room, then proceed to the next course using the heuristic function. If a constraint violation occurs, use the backtracking function to explore alternative paths.
+5. **Local Search**: Apply local search techniques to improve the solution. For example, swapping timeslots between two courses and evaluating the new schedule using the evaluation function.
+6. **ScheduleService Method**: Create a method in the ScheduleService class that generates a schedule for a given semester. Utilize the scheduling algorithm to produce the best possible schedule based on the specified constraints.
 
-1. Clone the repo:
-    ```
-    git clone https://github.com/kyalo-vibes/university-timetabling
-    ```
+## Timetable Example
 
-2. Build the project:
-    ```
-    mvn clean install
-    ```
+Here is an example of a university timetable generated by the system:
 
-3. Configure your database connection in `src/main/resources/application.properties`.
+University of Nairobi
+Faculty of Science and Technology
+Department of Computing and Informatics
+Semester 2, 2022/2023
 
-4. Run the project:
-    ```
-    mvn spring-boot:run
-    ```
+        | Monday   | Tuesday   | Wednesday | Thursday  | Friday    |
+----------------------------------------------------------------------
+9.00-10.45 | CSC 416  | CSC 434   | CSC 452   | CSC 434   |           |
+11.15-1.00 | CSC 416  | CSC 416   | CSC 455   | CSC 416   | CSC 452   |
+2.00-3.45  | CSC 416  | CSC 416   | CSC 455   |           |           |
+3.45-5.30  | CSC 434  | CSC 452   | CSC 455   | CSC 416   | CSC 416   |
 
-The server will start, and you can access the API at `http://localhost:8080`.
+Course           | Instructor   |
+---------------------------------
+CSC 416          | Mr. Ayienga  |
+CSC 434          | Mr. Moturi   |
+CSC 452          | Prof. Wausi  |
+CSC 455          |              |
 
-## API Documentation
+Venue: G2
+Learning: February 20, 2023 - May 19, 2023
+Exams: May 22 - June 2, 2023
 
-You can find the API documentation at `http://localhost:8080/swagger-ui.html` when the server is running.
+Approved by:
+Chair, Department of Computing & Informatics
+16th February 2023
+University of Nairobi
 
-## Set up Demo
 
-https://github.com/kyalo-vibes/university-timetabling/assets/95200602/ddc2628b-e5c9-442a-810a-8609dde5c040
