@@ -35,7 +35,7 @@ public class Department {
     private List<Course> courses = new ArrayList<>();
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonBackReference("room-department")
+    @JsonManagedReference("room-department")
     private List<Room> rooms = new ArrayList<>();
 
     @ManyToMany(mappedBy = "departments")

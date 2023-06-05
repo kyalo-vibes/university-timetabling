@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Form, Container } from "react-bootstrap";
+import { Button, Form, Container, Modal } from "react-bootstrap";
 import Layout from "../Layout/DashboardLayout";
 import { useContext } from "react";
 import AuthContext from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import "../styles/styles.css";
+
 
 const Home = () => {
   const [semester, setSemester] = useState(1);
@@ -18,6 +19,9 @@ const Home = () => {
   const { auth } = useAuth();
   const navigate = useNavigate();
   const [timeslots, setTimeslots] = useState([]);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false); // State variable for showing the reset confirmation modal
+
   
 
   const fetchTimeslots = () => {
@@ -137,6 +141,30 @@ const Home = () => {
     setTimetables(originalData);
   };
 
+  const handleHardReset = () => {
+    setResetLoading(true);
+
+    axios
+      .post("http://localhost:8080/reset", null, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        alert("Reset successful");
+        fetchTimetables();
+        setResetLoading(false);
+      })
+      .catch((error) => {
+        console.error(`Error: ${error}`);
+        setResetLoading(false);
+      });
+  };
+
+
+  const cancelReset = () => {
+    setShowResetModal(false);
+  };
   // Function to fetch all timetables
   const fetchTimetables = () => {
     axios
@@ -205,41 +233,54 @@ const Home = () => {
           </button>
         </section>
 
+
         <form className="flex justify-start items-center py-4">
-          <div>
-            <label>Semester</label>
-            <select className="select select-accent w-full max-w-xs">
-              <option disabled selected>
-                Select the semester
-              </option>
-              <option>1</option>
-              <option>2</option>
-            </select>
-          </div>
-          <button
-            className="btn btn-accent"
-            onClick={(event) => generateTimetable(event)}
-          >
-            Generate Timetable
-          </button>
-        </form>
+  <div className="mr-4">
+    <label>Semester</label>
+    <select className="select select-accent w-full max-w-xs">
+      <option disabled selected>
+        Select the semester
+      </option>
+      <option>1</option>
+      <option>2</option>
+    </select>
+  </div>
+  <button
+    className="btn btn-accent mt-5"
+    onClick={(event) => generateTimetable(event)}
+  >
+    Generate Timetable
+  </button>
+  <button
+  className="btn btn-danger mt-5 ml-5"
+  onClick={handleHardReset}
+  disabled={resetLoading} // Use resetLoading state instead of loading state
+>
+  Reset Schedules
+</button>
+
+
+</form>
 
         <h2>Timetables</h2>
-        <div className="flex flex-col items-start">
-          <Filter
-            columns={[
-              "ID",
-              "Course Codes",
-              "Time Slots",
-              "Instructor Names",
-              "Room Names",
-            ]}
-            onFilter={handleFilter}
-          />
-          <button className="btn btn-accent" onClick={handleReset}>
-            Reset Filters
-          </button>
-        </div>
+        <div className="flex flex-row items-center">
+  <Filter
+    columns={[
+      "ID",
+      "Course Codes",
+      "Time Slots",
+      "Instructor Names",
+      "Room Names",
+    ]}
+    onFilter={handleFilter}
+    className="mr-4" // Add margin-right to create a gap
+  />
+  <button className="btn btn-accent ml-4" onClick={handleReset}>
+    Reset Filters
+  </button>
+</div>
+
+
         <Table data={timetables} timeslots={timeslots} />
       </main>
     </Layout>
@@ -306,9 +347,9 @@ const Table = ({ data, timeslots }) => {
               <tbody>
                 {timetable.timeslots.map((timeslot, index) => (
                   <tr key={timeslot}>
-                    <td className="border px-4 py-2">{timeslot}</td>
+                    <td className="border px-4 py-2 text-center bold-text">{timeslot}</td>
                     {timetable.days.map(day => (
-                      <td key={day} className={`border px-4 py-2 ${timetable.schedule[day][index] ? '' : 'shaded'}`}>
+                      <td key={day} className={`border px-4 py-2 ${timetable.schedule[day][index] ? '' : 'shaded'} text-center`}>
                         {timetable.schedule[day][index] ? 
                           <>
                             <div>{timetable.schedule[day][index].courseCode}</div>

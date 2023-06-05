@@ -49,7 +49,8 @@
   
   .table-auto {
     width: 100%;
-    border-collapse: collapse;
+    height: 100%;
+    table-layout: fixed;
   }
   
   .px-4 {
@@ -63,7 +64,9 @@
   }
   
   .border {
-    border: 2px solid black;
+    border: 2px solid #d1d5db; /* Change border color */
+    width: 150px;
+    height: 50px;
   }
   
   .timetable-header,
@@ -72,6 +75,51 @@
   }
   
   .shaded {
-    background-color: #e0e0e0;
+    background-color: #f3f4f6; /* Change shaded background color */
   }
+  
+  .timetable {
+    margin-bottom: 2rem;
+  }
+  
+  .timetable-header {
+    font-size: 1.5rem;
+    color: #333; /* Change header text color */
+  }
+  
+  .table-auto {
+    border-collapse: collapse;
+  }
+  
+  .table-auto th,
+  .table-auto td {
+    padding: 0.75rem; /* Increase cell padding */
+  }
+  
+  .table-auto th {
+    background-color: #f3f4f6; /* Change header background color */
+    font-weight: bold;
+    color: #333; /* Change header text color */
+  }
+  
+  .table-auto td {
+    vertical-align: middle;
+    text-align: center;
+  }
+  
+  .message {
+    color: #666;
+  }
+  
+  /* Hover effect for cells */
+  .table-auto td:hover {
+    background-color: #edf2f7; /* Change hover background color */
+    cursor: pointer;
+  }
+
+  .bold-text {
+    font-weight: bold;
+  }
+  
+  
   

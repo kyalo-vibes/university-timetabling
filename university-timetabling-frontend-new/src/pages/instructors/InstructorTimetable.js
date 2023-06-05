@@ -134,12 +134,6 @@ const formatTimetableData = (scheduleData, uniqueTimeslots) => {
 };
 
 
-
-
-
-
-
-
 const Table = ({ data, timeslots }) => {
   console.log("Inside table component", data); // Add this line
   // Extract unique timeslots from the timeslots prop
@@ -167,7 +161,7 @@ const scheduleData = Array.isArray(data) ? data[0] : data;
         <tbody>
           {timetable.timeslots.map((timeslot, index) => (
             <tr key={timeslot}>
-              <td className="border px-4 py-2">{timeslot}</td>
+              <td className="border px-4 py-2 bold-text">{timeslot}</td>
               {timetable.days.map(day => (
                 <td key={day} className={`border px-4 py-2 ${timetable.schedule[day][index] ? '' : 'shaded'}`}>
                   {timetable.schedule[day][index] ? 

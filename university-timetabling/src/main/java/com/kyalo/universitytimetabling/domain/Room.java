@@ -31,7 +31,7 @@ public class Room {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "dept_id", nullable = false)
-    @JsonManagedReference("room-department")
+    @JsonBackReference("room-department")
     private Department department;
 
     @ManyToMany

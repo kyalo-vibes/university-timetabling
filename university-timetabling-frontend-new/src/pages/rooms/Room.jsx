@@ -49,10 +49,10 @@ const Room = () => {
       roomName: roomName,
       roomCapacity: roomCapacity,
       roomType: roomType,
-      isAvailable: isAvailable,
+      available: isAvailable,
       deptName: selectedDeptName,
     };
-
+    console.log(newRoom);
     axios
       .post("http://localhost:8080/api/rooms", newRoom, {
         headers: {

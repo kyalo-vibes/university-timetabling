@@ -152,7 +152,7 @@ const scheduleData = Array.isArray(data) ? data[0] : data;
       <table className="table-auto">
         <thead>
           <tr>
-            <th className="px-4 py-2 border">Time Slot</th>
+            <th className="px-4 py-2 border bold-text">Time Slot</th>
             {timetable.days.map(day => (
               <th key={day} className="px-4 py-2 border">{day}</th>
             ))}
@@ -161,7 +161,7 @@ const scheduleData = Array.isArray(data) ? data[0] : data;
         <tbody>
           {timetable.timeslots.map((timeslot, index) => (
             <tr key={timeslot}>
-              <td className="border px-4 py-2">{timeslot}</td>
+              <td className="border px-4 py-2 bold-text">{timeslot}</td>
               {timetable.days.map(day => (
                 <td key={day} className={`border px-4 py-2 ${timetable.schedule[day][index] ? '' : 'shaded'}`}>
                   {timetable.schedule[day][index] ? 
